@@ -159,7 +159,7 @@ export function useRoom(enabled = true) {
       }
     } catch {
       setConnected(false);
-      setError('Could not connect to sync server. Retrying…');
+      setError('Lost connection to sync server. Retrying…');
     }
   }, [applyMessage]);
 
@@ -197,7 +197,9 @@ export function useRoom(enabled = true) {
       pollTimer.current = setInterval(pollOnce, POLL_INTERVAL_MS);
     } catch {
       setConnected(false);
-      setError('Could not connect to sync server. Retrying…');
+      setError(
+        'Could not reach /api/sync. Hard refresh the page (Cmd+Shift+R). If testing locally, run npm run dev.',
+      );
       reconnectTimer.current = setTimeout(connectApi, RECONNECT_DELAY_MS);
     }
   }, [applyMessage, pollOnce]);
@@ -225,7 +227,9 @@ export function useRoom(enabled = true) {
 
     ws.onerror = () => {
       if (!intentionalClose.current) {
-        setError('Could not connect to sync server. Retrying…');
+        setError(
+          'Could not connect to sync server. Run npm run dev locally (starts both app + sync server).',
+        );
       }
     };
 

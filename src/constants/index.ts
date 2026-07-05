@@ -200,8 +200,15 @@ export function getWsUrl(): string {
 
 /** Use HTTP polling via /api/sync on Vercel (no separate WebSocket server). */
 export function useSyncApi(): boolean {
-  if (import.meta.env.VITE_WS_URL) return false;
+  // Local dev uses the WebSocket server via Vite proxy
   if (import.meta.env.DEV) return false;
+
+  // Production: use built-in /api/sync unless a real external WS server is configured
+  const wsUrl = import.meta.env.VITE_WS_URL as string | undefined;
+  if (wsUrl && !wsUrl.includes(':3001') && wsUrl.startsWith('ws')) {
+    return false;
+  }
+
   return true;
 }
 
