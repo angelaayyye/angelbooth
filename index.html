@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📸</text></svg>" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pompam Diary - Frame Gallery</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              surface: "#fff9e8",
+              "on-primary-fixed-variant": "#603c4d",
+              "tertiary-fixed": "#c8e6ff",
+              "on-tertiary-container": "#3d637d",
+              "surface-container-lowest": "#ffffff",
+              "secondary-container": "#aaeec9",
+              "outline-variant": "#d2c2c7",
+              "inverse-surface": "#333124",
+              "surface-container-high": "#eee8d5",
+              "primary-fixed": "#ffd8e7",
+              "surface-container-highest": "#e8e2d0",
+              "surface-container": "#f4eedb",
+              "on-tertiary": "#ffffff",
+              "secondary-fixed": "#adf1cc",
+              "on-surface-variant": "#4f4448",
+              "on-error-container": "#93000a",
+              "on-secondary-container": "#2c6e51",
+              tertiary: "#3c627c",
+              "on-tertiary-fixed": "#001e2e",
+              secondary: "#276a4d",
+              "on-primary": "#ffffff",
+              "inverse-primary": "#eab9ce",
+              "on-secondary": "#ffffff",
+              primary: "#7a5365",
+              "error-container": "#ffdad6",
+              "on-tertiary-fixed-variant": "#234b63",
+              "primary-fixed-dim": "#eab9ce",
+              "on-primary-container": "#7b5365",
+              "secondary-fixed-dim": "#91d5b1",
+              "tertiary-container": "#b8dffd",
+              "on-secondary-fixed-variant": "#045136",
+              "surface-dim": "#dfdac8",
+              "inverse-on-surface": "#f6f1de",
+              "on-background": "#1e1c11",
+              "surface-bright": "#fff9e8",
+              background: "#fff9e8",
+              "on-primary-fixed": "#2f1121",
+              "tertiary-fixed-dim": "#a5cbe9",
+              "surface-variant": "#e8e2d0",
+              "on-error": "#ffffff",
+              "surface-tint": "#7a5365",
+              outline: "#817478",
+              "on-surface": "#1e1c11",
+              "surface-container-low": "#f9f3e1",
+              error: "#ba1a1a",
+              "on-secondary-fixed": "#002113",
+              "primary-container": "#ffcce1"
+            },
+            borderRadius: {
+              DEFAULT: "0.25rem",
+              lg: "0.5rem",
+              xl: "0.75rem",
+              full: "9999px"
+            },
+            spacing: {
+              "container-padding": "24px",
+              unit: "8px",
+              "window-gap": "32px",
+              "inner-padding": "16px"
+            },
+            fontFamily: {
+              "label-pixel": ["Space Mono"],
+              "body-md": ["Plus Jakarta Sans"],
+              "headline-md": ["Plus Jakarta Sans"],
+              "label-ui": ["Space Mono"],
+              "headline-lg": ["Plus Jakarta Sans"],
+              "body-lg": ["Plus Jakarta Sans"],
+              "headline-lg-mobile": ["Plus Jakarta Sans"]
+            },
+            fontSize: {
+              "label-pixel": ["14px", { lineHeight: "1.2", fontWeight: "400" }],
+              "body-md": ["16px", { lineHeight: "1.5", fontWeight: "400" }],
+              "headline-md": ["32px", { lineHeight: "1.3", fontWeight: "700" }],
+              "label-ui": ["12px", { lineHeight: "1.2", fontWeight: "700" }],
+              "headline-lg": ["48px", { lineHeight: "1.2", letterSpacing: "-0.02em", fontWeight: "800" }],
+              "body-lg": ["18px", { lineHeight: "1.6", fontWeight: "500" }],
+              "headline-lg-mobile": ["32px", { lineHeight: "1.2", fontWeight: "800" }]
+            }
+          }
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

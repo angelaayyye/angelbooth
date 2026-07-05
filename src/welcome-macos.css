@@ -1,0 +1,67 @@
+.macos-welcome-root {
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDoMoIwEf9ImNkL_1bM5k6gD5wHRuW5UhDb1LUjlJtHLPFbX5ub-jeVx23EqKiQemObMP7UOcPIlNTbT8nFizzzqhMDqaC6vM8C6Aue05L685YRWhI49_-JJriuXqea3kipsMRZxzPH-5iRbiqn2lkv_YN0InxesJ7vCVsbrMd1_LF5Qw9kH4MLDJC_RNUQRCZgL9GRiHpESIrzwJfsREXtfHJQGcikqdJyZrFbO0r4o6Y1xXzvgJmB07EcwJkhFwYb');
+  background-size: cover;
+  background-position: center;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+}
+
+.macos-welcome-root .macos-glass {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.macos-welcome-root .macos-dark-glass {
+  background: rgba(45, 45, 45, 0.4);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.macos-welcome-root .window-shadow {
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.1);
+}
+
+.macos-welcome-root .notification-shadow {
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.05);
+}
+
+.macos-welcome-root .dock-icon {
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.macos-welcome-root .dock-icon:hover {
+  transform: scale(1.2) translateY(-10px);
+}
+
+.macos-welcome-root .bubble {
+  max-width: 75%;
+  padding: 8px 16px;
+  border-radius: 18px;
+  font-size: 15px;
+  line-height: 1.4;
+  margin-bottom: 2px;
+  position: relative;
+}
+
+.macos-welcome-root .bubble-gray {
+  background-color: #e9e9eb;
+  color: black;
+  align-self: flex-start;
+  border-bottom-left-radius: 4px;
+}
+
+.macos-welcome-root .bubble-blue {
+  background-color: #007aff;
+  color: white;
+  align-self: flex-end;
+  border-bottom-right-radius: 4px;
+}

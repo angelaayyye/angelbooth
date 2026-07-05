@@ -1,0 +1,85 @@
+.capture-studio-root {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  background-image: url('https://lh3.googleusercontent.com/aida/AP1WRLuKNDhHX8OOgyFsWrGUc0HH1_OQzFHWmv6Qy4u2T8fbSjMNbPNUDJi0aT9bnzx-vr-hJjbhRjBMsl0tacRP2q6wG78en_SEI8PGBMzt1rXx7AKAp8-WTOoH643qG_nZ29QdqsAIi_cmPQVRNnMndFuxnWy2Qelxuu3XJKoLyjRuzWsXj3pG8Hl97GkLG6Z1RyOB2h0wWxUTngE9raFXCQIMQJjp9asA6bypn2yf8nT_YFGl-zp4tJNVbw');
+  background-size: cover;
+  background-position: center;
+}
+
+.capture-studio-root .material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+.capture-studio-root .window-shadow {
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+}
+
+.capture-studio-root .shutter-press:active {
+  transform: scale(0.95);
+}
+
+.capture-studio-root .dock-item {
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.capture-studio-root .dock-item:hover {
+  transform: translateY(-10px) scale(1.2);
+}
+
+.capture-studio-root .glass-panel {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.capture-studio-root .camera-flash-overlay {
+  position: fixed;
+  inset: 0;
+  background: white;
+  z-index: 200;
+  pointer-events: none;
+  animation: capture-flash 0.55s ease-out forwards;
+}
+
+@keyframes capture-flash {
+  0% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.capture-studio-root .countdown-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.35);
+  z-index: 20;
+}
+
+.capture-studio-root .countdown-number {
+  font-family: 'Space Mono', monospace;
+  font-size: 6rem;
+  font-weight: 700;
+  color: white;
+  text-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+}
+
+.capture-studio-root .preview-slot-filled {
+  transform: rotate(-1deg);
+  transition: transform 0.2s ease;
+}
+
+.capture-studio-root .preview-slot-filled:hover {
+  transform: rotate(0deg);
+}
+
+.capture-studio-root .preview-slot-current {
+  box-shadow: 0 0 0 2px #7a5365;
+}
