@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { CapturedPhoto, LayoutOption } from '../types';
 import { COUNTDOWN_SECONDS } from '../constants';
 import { useCamera } from '../hooks/useCamera';
+import { useDuoVideo } from '../hooks/useDuoVideo';
 import '../capture-studio.css';
 
 interface CameraCaptureProps {
@@ -11,6 +12,8 @@ interface CameraCaptureProps {
   onComplete: () => void;
   onBack: () => void;
   isRemote?: boolean;
+  isHost?: boolean;
+  playerId?: string | null;
   currentPhotoIndex?: number;
   syncCountdown?: {
     photoIndex: number;
@@ -20,6 +23,10 @@ interface CameraCaptureProps {
   waitingForPartner?: boolean;
   onStartCountdown?: (photoIndex: number) => void;
   onPhotoCaptured?: (photoIndex: number, dataUrl: string) => void;
+  sendWebRtcSignal?: (signal: unknown) => void;
+  subscribeWebRtcSignal?: (
+    fn: (from: string, signal: unknown) => void,
+  ) => () => void;
 }
 
 function useLiveClock() {
@@ -110,16 +117,35 @@ export function CameraCapture({
   onPhotosChange,
   onComplete,
   isRemote = false,
+  isHost = false,
+  playerId = null,
   currentPhotoIndex = 0,
   syncCountdown = null,
   waitingForPartner = false,
   onStartCountdown,
   onPhotoCaptured,
+  sendWebRtcSignal,
+  subscribeWebRtcSignal,
 }: CameraCaptureProps) {
   const clock = useLiveClock();
   const [facingMode, setFacingMode] = useState<'user' | 'environment'>('user');
-  const { videoRef, isReady, error, start, stop, capture } = useCamera({
+  const [mirrored, setMirrored] = useState(true);
+  const { videoRef, isReady, error, start, stop, capture, getStream } = useCamera({
     facingMode,
+    mirrored,
+  });
+  const [localStream, setLocalStream] = useState<MediaStream | null>(null);
+
+  const noopSubscribe = useCallback(() => () => {}, []);
+  const noopSend = useCallback(() => {}, []);
+
+  const { remoteVideoRef, partnerConnected } = useDuoVideo({
+    enabled: isRemote && !!sendWebRtcSignal && !!subscribeWebRtcSignal,
+    isHost,
+    playerId,
+    localStream,
+    sendSignal: sendWebRtcSignal ?? noopSend,
+    subscribeSignal: subscribeWebRtcSignal ?? noopSubscribe,
   });
   const [localCountdown, setLocalCountdown] = useState<number | null>(null);
   const [remoteDisplayCount, setRemoteDisplayCount] = useState<number | null>(null);
@@ -187,6 +213,16 @@ export function CameraCapture({
     start();
     return () => stop();
   }, [start, stop, facingMode]);
+
+  useEffect(() => {
+    if (isReady) {
+      setLocalStream(getStream());
+    }
+  }, [isReady, getStream, facingMode]);
+
+  useEffect(() => {
+    setMirrored(facingMode === 'user');
+  }, [facingMode]);
 
   useEffect(() => {
     capturedRef.current = false;
@@ -261,6 +297,72 @@ export function CameraCapture({
     stop();
     setFacingMode((m) => (m === 'user' ? 'environment' : 'user'));
   };
+
+  const viewfinderContent = (
+    <>
+      {isRemote ? (
+        <div className="absolute inset-0 flex">
+          <div className="relative flex-1 min-w-0 overflow-hidden">
+            <video
+              ref={videoRef}
+              className={`absolute inset-0 w-full h-full object-cover ${mirrored ? 'camera-mirror' : ''}`}
+              playsInline
+              muted
+              autoPlay
+            />
+            <span className="duo-viewfinder-label">You</span>
+          </div>
+          <div className="w-1 bg-white shrink-0 z-10" />
+          <div className="relative flex-1 min-w-0 overflow-hidden bg-zinc-900">
+            <video
+              ref={remoteVideoRef}
+              className="absolute inset-0 w-full h-full object-cover"
+              playsInline
+              autoPlay
+            />
+            {!partnerConnected && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-white/70 px-4 text-center">
+                <span className="material-symbols-outlined text-[32px] opacity-60">
+                  person
+                </span>
+                <span className="text-[12px] font-medium">Friend connecting…</span>
+              </div>
+            )}
+            <span className="duo-viewfinder-label">Friend</span>
+          </div>
+        </div>
+      ) : (
+        <video
+          ref={videoRef}
+          className={`absolute inset-0 w-full h-full object-cover ${mirrored ? 'camera-mirror' : ''}`}
+          playsInline
+          muted
+          autoPlay
+        />
+      )}
+      {!isReady && (
+        <div className="absolute inset-0 flex items-center justify-center text-white/80 text-body-md z-20">
+          Loading camera…
+        </div>
+      )}
+      <div className="absolute inset-0 pointer-events-none border-[12px] border-white/10 rounded-2xl" />
+      {isReady && (
+        <>
+          <div className="absolute top-4 left-4 bg-red-500 w-2 h-2 rounded-full animate-pulse z-10" />
+          <div className="absolute top-4 left-8 text-white text-[10px] font-label-pixel tracking-widest uppercase z-10">
+            {isRemote ? 'Duo live' : 'Recording'}
+          </div>
+        </>
+      )}
+      {displayCount !== null && (
+        <div className="countdown-overlay">
+          <span className="countdown-number">
+            {displayCount > 0 ? displayCount : '📸'}
+          </span>
+        </div>
+      )}
+    </>
+  );
 
   const shutterDisabled =
     !isReady ||
@@ -377,6 +479,14 @@ export function CameraCapture({
               <div className="flex items-center gap-4 text-on-surface-variant">
                 <button
                   type="button"
+                  onClick={() => setMirrored((m) => !m)}
+                  className={`material-symbols-outlined cursor-pointer hover:text-primary bg-transparent border-none p-0 ${mirrored ? 'text-primary' : ''}`}
+                  title="Mirror camera"
+                >
+                  flip
+                </button>
+                <button
+                  type="button"
                   onClick={handleFlip}
                   className="material-symbols-outlined cursor-pointer hover:text-primary bg-transparent border-none p-0"
                   title="Flip camera"
@@ -404,36 +514,7 @@ export function CameraCapture({
                     </button>
                   </div>
                 ) : (
-                  <>
-                    <video
-                      ref={videoRef}
-                      className="absolute inset-0 w-full h-full object-cover"
-                      playsInline
-                      muted
-                      autoPlay
-                    />
-                    {!isReady && (
-                      <div className="absolute inset-0 flex items-center justify-center text-white/80 text-body-md">
-                        Loading camera…
-                      </div>
-                    )}
-                    <div className="absolute inset-0 pointer-events-none border-[12px] border-white/10 rounded-2xl" />
-                    {isReady && (
-                      <>
-                        <div className="absolute top-4 left-4 bg-red-500 w-2 h-2 rounded-full animate-pulse" />
-                        <div className="absolute top-4 left-8 text-white text-[10px] font-label-pixel tracking-widest uppercase">
-                          Recording
-                        </div>
-                      </>
-                    )}
-                    {displayCount !== null && (
-                      <div className="countdown-overlay">
-                        <span className="countdown-number">
-                          {displayCount > 0 ? displayCount : '📸'}
-                        </span>
-                      </div>
-                    )}
-                  </>
+                  viewfinderContent
                 )}
 
                 <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-10">

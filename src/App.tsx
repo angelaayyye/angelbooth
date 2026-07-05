@@ -183,6 +183,8 @@ function App() {
               }
             }}
             isRemote={sessionMode === 'remote'}
+            isHost={roomApi.isHost}
+            playerId={roomApi.playerId}
             currentPhotoIndex={roomApi.room?.currentPhotoIndex ?? 0}
             syncCountdown={roomApi.syncCountdown}
             waitingForPartner={roomApi.waitingForPartner}
@@ -190,6 +192,8 @@ function App() {
               roomApi.startCountdown(idx, COUNTDOWN_SECONDS)
             }
             onPhotoCaptured={handleRemotePhoto}
+            sendWebRtcSignal={roomApi.sendWebRtcSignal}
+            subscribeWebRtcSignal={roomApi.subscribeWebRtcSignal}
           />
         )}
 

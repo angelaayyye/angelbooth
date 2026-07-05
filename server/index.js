@@ -207,6 +207,16 @@ wss.on('connection', (ws) => {
         break;
       }
 
+      case 'webrtc-signal': {
+        if (!meta.roomId || !msg.signal) break;
+        broadcast(
+          meta.roomId,
+          { type: 'webrtc-signal', from: meta.playerId, signal: msg.signal },
+          ws,
+        );
+        break;
+      }
+
       default:
         break;
     }

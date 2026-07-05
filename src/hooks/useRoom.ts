@@ -33,7 +33,8 @@ type ServerMessage =
       room: RoomState;
     }
   | { type: 'player-left'; playerId: string; room: RoomState }
-  | { type: 'error'; message: string };
+  | { type: 'error'; message: string }
+  | { type: 'webrtc-signal'; from: string; signal: unknown };
 
 const RECONNECT_DELAY_MS = 2000;
 const POLL_INTERVAL_MS = 800;
@@ -47,6 +48,9 @@ export function useRoom(enabled = true) {
   const playerIdRef = useRef<string | null>(null);
   const pollCursorRef = useRef(0);
   const roomIdRef = useRef<string | null>(null);
+  const webrtcListenersRef = useRef(
+    new Set<(from: string, signal: unknown) => void>(),
+  );
 
   const [connected, setConnected] = useState(false);
   const [playerId, setPlayerId] = useState<string | null>(null);
@@ -123,6 +127,9 @@ export function useRoom(enabled = true) {
         break;
       case 'error':
         setError(msg.message);
+        break;
+      case 'webrtc-signal':
+        webrtcListenersRef.current.forEach((fn) => fn(msg.from, msg.signal));
         break;
     }
   }, []);
@@ -385,6 +392,21 @@ export function useRoom(enabled = true) {
 
   const clearDuoSlotReady = useCallback(() => setDuoSlotReady(null), []);
 
+  const sendWebRtcSignal = useCallback(
+    (signal: unknown) => send({ type: 'webrtc-signal', signal }),
+    [send],
+  );
+
+  const subscribeWebRtcSignal = useCallback(
+    (fn: (from: string, signal: unknown) => void) => {
+      webrtcListenersRef.current.add(fn);
+      return () => {
+        webrtcListenersRef.current.delete(fn);
+      };
+    },
+    [],
+  );
+
   const retryConnect = useCallback(() => {
     if (useApi) connectApi();
     else connectWs();
@@ -412,5 +434,7 @@ export function useRoom(enabled = true) {
     clearDuoSlotReady,
     setError,
     retryConnect,
+    sendWebRtcSignal,
+    subscribeWebRtcSignal,
   };
 }

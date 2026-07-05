@@ -210,6 +210,18 @@ export function processSyncMessage(roomManager, playerId, msg) {
       return { playerId, outbound, roomId: null };
     }
 
+    case 'webrtc-signal': {
+      if (!msg.roomId || !msg.signal) {
+        return { playerId, outbound, roomId: msg.roomId ?? null };
+      }
+      broadcast(
+        msg.roomId,
+        { type: 'webrtc-signal', from: playerId, signal: msg.signal },
+        playerId,
+      );
+      return { playerId, outbound, roomId: msg.roomId };
+    }
+
     default:
       return { playerId, outbound, roomId: msg.roomId ?? null };
   }

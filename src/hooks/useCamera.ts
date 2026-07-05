@@ -2,9 +2,13 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 interface UseCameraOptions {
   facingMode?: 'user' | 'environment';
+  mirrored?: boolean;
 }
 
-export function useCamera({ facingMode = 'user' }: UseCameraOptions = {}) {
+export function useCamera({
+  facingMode = 'user',
+  mirrored = true,
+}: UseCameraOptions = {}) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const [isReady, setIsReady] = useState(false);
@@ -63,19 +67,16 @@ export function useCamera({ facingMode = 'user' }: UseCameraOptions = {}) {
     const ctx = canvas.getContext('2d');
     if (!ctx) return null;
 
-    ctx.translate(canvas.width, 0);
-    ctx.scale(-1, 1);
+    if (mirrored) {
+      ctx.translate(canvas.width, 0);
+      ctx.scale(-1, 1);
+    }
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
     return canvas.toDataURL('image/jpeg', 0.92);
-  }, [isReady]);
+  }, [isReady, mirrored]);
 
-  const flipCamera = useCallback(async () => {
-    stop();
-    const newMode = facingMode === 'user' ? 'environment' : 'user';
-    // restart with flipped mode handled by caller updating facingMode prop
-    return newMode;
-  }, [facingMode, stop]);
+  const getStream = useCallback(() => streamRef.current, []);
 
   useEffect(() => {
     return () => {
@@ -85,5 +86,5 @@ export function useCamera({ facingMode = 'user' }: UseCameraOptions = {}) {
     };
   }, []);
 
-  return { videoRef, isReady, error, start, stop, capture, flipCamera };
+  return { videoRef, isReady, error, start, stop, capture, getStream };
 }
