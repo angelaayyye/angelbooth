@@ -39,11 +39,18 @@ async function persistRooms(redis, manager) {
   }
 }
 
+function parseQueueItem(item) {
+  if (typeof item === 'string') {
+    return JSON.parse(item);
+  }
+  return item;
+}
+
 async function enqueueMessages(redis, outbound) {
   for (const { targetId, message } of outbound) {
     const key = `${PREFIX}queue:${targetId}`;
     if (redis) {
-      await redis.rpush(key, JSON.stringify(message));
+      await redis.rpush(key, message);
       await redis.expire(key, ROOM_TTL);
     } else {
       if (!globalThis.__photoboothQueues) {
@@ -65,13 +72,13 @@ async function pollMessages(redis, playerId, cursor) {
     if (cursor < len) {
       raw = await redis.lrange(key, cursor, len - 1);
     }
-    return { messages: raw.map((item) => JSON.parse(item)), cursor: len };
+    return { messages: raw.map(parseQueueItem), cursor: len };
   }
 
   const queue = globalThis.__photoboothQueues?.get(key) ?? [];
   raw = queue.slice(cursor);
   return {
-    messages: raw.map((item) => JSON.parse(item)),
+    messages: raw.map(parseQueueItem),
     cursor: queue.length,
   };
 }
@@ -99,20 +106,25 @@ export default async function handler(req, res) {
   }
 
   if (req.method === 'GET') {
-    const playerId = req.query.playerId;
-    const cursor = Number(req.query.cursor ?? 0);
+    try {
+      const playerId = req.query.playerId;
+      const cursor = Number(req.query.cursor ?? 0);
 
-    if (!playerId) {
-      res.status(400).json({ error: 'playerId required' });
-      return;
+      if (!playerId) {
+        res.status(400).json({ error: 'playerId required' });
+        return;
+      }
+
+      const { messages, cursor: nextCursor } = await pollMessages(
+        redis,
+        playerId,
+        cursor,
+      );
+      res.status(200).json({ messages, cursor: nextCursor, ok: true });
+    } catch (err) {
+      console.error('sync poll error', err);
+      res.status(500).json({ error: 'Sync poll error' });
     }
-
-    const { messages, cursor: nextCursor } = await pollMessages(
-      redis,
-      playerId,
-      cursor,
-    );
-    res.status(200).json({ messages, cursor: nextCursor, ok: true });
     return;
   }
 

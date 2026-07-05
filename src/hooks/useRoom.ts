@@ -142,6 +142,10 @@ export function useRoom(enabled = true) {
       const res = await fetch(
         `${getSyncApiUrl()}?playerId=${encodeURIComponent(id)}&cursor=${pollCursorRef.current}`,
       );
+      const contentType = res.headers.get('content-type') ?? '';
+      if (!contentType.includes('application/json')) {
+        throw new Error('Invalid sync response');
+      }
       const data = await res.json();
 
       if (!res.ok) {

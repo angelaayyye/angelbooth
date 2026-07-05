@@ -200,6 +200,11 @@ export function getWsUrl(): string {
 
 /** Use HTTP polling via /api/sync on Vercel (no separate WebSocket server). */
 export function useSyncApi(): boolean {
+  if (typeof window !== 'undefined') {
+    const host = window.location.hostname;
+    if (host === 'localhost' || host === '127.0.0.1') return false;
+  }
+
   // Local dev uses the WebSocket server via Vite proxy
   if (import.meta.env.DEV) return false;
 
