@@ -69,6 +69,10 @@ export function processSyncMessage(roomManager, playerId, msg) {
 
     case 'join-room': {
       const name = (msg.name || 'Player 2').slice(0, 20);
+      if (!msg.roomId) {
+        sendTo(playerId, { type: 'error', message: 'Room code required.' });
+        return { playerId, outbound, roomId: null };
+      }
       const result = roomManager.joinRoom(msg.roomId, playerId, name);
       if (result.error) {
         sendTo(playerId, { type: 'error', message: result.error });

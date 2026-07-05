@@ -270,9 +270,9 @@ export function useRoom(enabled = true) {
   const postAction = useCallback(
     async (message: Record<string, unknown>) => {
       const payload = {
-        ...message,
         playerId: playerIdRef.current,
         roomId: roomIdRef.current,
+        ...message,
       };
 
       try {
