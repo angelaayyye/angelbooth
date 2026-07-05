@@ -228,6 +228,6 @@ wss.on('connection', (ws) => {
 
 setInterval(() => rooms.cleanup(), 5 * 60 * 1000);
 
-server.listen(PORT, () => {
+server.listen(PORT, '0.0.0.0', () => {
   console.log(`Photobooth sync server on port ${PORT}`);
 });

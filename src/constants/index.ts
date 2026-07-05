@@ -193,5 +193,9 @@ export function getWsUrl(): string {
   if (import.meta.env.DEV) {
     return `${protocol}//${window.location.host}/ws`;
   }
+  // Production: sync server must be hosted separately (e.g. Render)
+  if (import.meta.env.VITE_SYNC_HOST) {
+    return `${protocol}//${import.meta.env.VITE_SYNC_HOST}`;
+  }
   return `${protocol}//${window.location.hostname}:3001`;
 }

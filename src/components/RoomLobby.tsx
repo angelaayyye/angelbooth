@@ -144,10 +144,21 @@ export function RoomLobby({
                   {!inRoom ? (
                     <div className="mt-4 p-4 bg-surface-container-low rounded-xl border border-outline-variant flex flex-col gap-4">
                       {!connected && (
-                        <p className="text-[12px] text-center text-gray-500">Connecting to sync server…</p>
+                        <p className="text-[12px] text-center text-gray-500">
+                          Connecting to sync server…
+                        </p>
                       )}
                       {error && (
-                        <p className="text-[12px] text-center text-red-600">{error}</p>
+                        <p className="text-[12px] text-center text-red-600">
+                          {error}
+                          {!connected && (
+                            <span className="block mt-1 text-gray-500">
+                              Duo mode needs the sync server running. Deploy{' '}
+                              <code className="text-[11px]">server/</code> on Render and set{' '}
+                              <code className="text-[11px]">VITE_WS_URL</code> in Vercel.
+                            </span>
+                          )}
+                        </p>
                       )}
 
                       <div className="flex flex-col gap-1">

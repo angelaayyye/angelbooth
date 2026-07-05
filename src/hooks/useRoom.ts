@@ -37,7 +37,7 @@ type ServerMessage =
 
 const RECONNECT_DELAY_MS = 2000;
 
-export function useRoom() {
+export function useRoom(enabled = true) {
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const intentionalClose = useRef(false);
@@ -149,13 +149,22 @@ export function useRoom() {
   }, [handleMessage]);
 
   useEffect(() => {
+    if (!enabled) {
+      intentionalClose.current = true;
+      if (reconnectTimer.current) clearTimeout(reconnectTimer.current);
+      wsRef.current?.close();
+      wsRef.current = null;
+      setConnected(false);
+      return;
+    }
+
     connect();
     return () => {
       intentionalClose.current = true;
       if (reconnectTimer.current) clearTimeout(reconnectTimer.current);
       wsRef.current?.close();
     };
-  }, [connect]);
+  }, [connect, enabled]);
 
   const send = useCallback((message: object) => {
     if (wsRef.current?.readyState === WebSocket.OPEN) {

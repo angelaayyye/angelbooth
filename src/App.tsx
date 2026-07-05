@@ -19,7 +19,7 @@ function App() {
   const [step, setStep] = useState<AppStep>('welcome');
   const [layout, setLayout] = useState<LayoutOption>(LAYOUTS[0]);
   const [theme, setTheme] = useState<ThemeOption>(THEMES[0]);
-  const [sessionMode, setSessionMode] = useState<SessionMode>('solo');
+  const [sessionMode, setSessionMode] = useState<SessionMode | null>(null);
   const [photos, setPhotos] = useState<(CapturedPhoto | undefined)[]>([]);
 
   const indexedPhotos = useMemo(
@@ -27,7 +27,7 @@ function App() {
     [photos, layout.photoCount],
   );
 
-  const roomApi = useRoom();
+  const roomApi = useRoom(sessionMode === 'remote');
 
   useEffect(() => {
     if (sessionMode === 'remote' && roomApi.isHost && roomApi.room) {
@@ -88,12 +88,13 @@ function App() {
     setPhotos([]);
     if (sessionMode === 'remote') {
       roomApi.leaveRoom();
-      setSessionMode('solo');
     }
+    setSessionMode(null);
     setStep('welcome');
   };
 
   const handleSetupContinue = () => {
+    if (!sessionMode) return;
     if (sessionMode === 'remote') {
       setStep('lobby');
     } else {
@@ -143,6 +144,7 @@ function App() {
         {step === 'setup' && (
           <SetupScreen
             selectedLayout={layout}
+            sessionMode={sessionMode}
             onLayoutSelect={setLayout}
             onSessionModeChange={setSessionMode}
             onEnter={handleSetupContinue}

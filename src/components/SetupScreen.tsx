@@ -4,6 +4,7 @@ import '../setup-gallery.css';
 
 interface SetupScreenProps {
   selectedLayout: LayoutOption;
+  sessionMode: SessionMode | null;
   onLayoutSelect: (layout: LayoutOption) => void;
   onSessionModeChange: (mode: SessionMode) => void;
   onEnter: () => void;
@@ -62,6 +63,7 @@ function FramePreview({ layoutId }: { layoutId: LayoutId }) {
 
 export function SetupScreen({
   selectedLayout,
+  sessionMode,
   onLayoutSelect,
   onSessionModeChange,
   onEnter,
@@ -134,27 +136,47 @@ export function SetupScreen({
                   <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-widest">Today 9:41 AM</span>
                 </div>
 
-                <div className="bubble bubble-gray">
-                  are u taking photos{' '}
-                  <button
-                    type="button"
-                    onClick={() => onSessionModeChange('solo')}
-                    className="bg-blue-500 text-white px-3 py-1 rounded-full text-[13px] font-bold hover:bg-blue-600 transition-colors mx-1"
-                  >
-                    by yourself
-                  </button>{' '}
-                  or{' '}
-                  <button
-                    type="button"
-                    onClick={() => onSessionModeChange('remote')}
-                    className="bg-blue-500 text-white px-3 py-1 rounded-full text-[13px] font-bold hover:bg-blue-600 transition-colors mx-1"
-                  >
-                    with a friend
-                  </button>
-                  ?
+                <div className="relative z-30 flex flex-col gap-2">
+                  <div className="bubble bubble-gray">
+                    are u taking photos{' '}
+                    <button
+                      type="button"
+                      onClick={() => onSessionModeChange('solo')}
+                      className={`px-3 py-1 rounded-full text-[13px] font-bold transition-colors mx-1 ${
+                        sessionMode === 'solo'
+                          ? 'bg-green-600 text-white ring-2 ring-green-300'
+                          : 'bg-blue-500 text-white hover:bg-blue-600'
+                      }`}
+                    >
+                      by yourself
+                    </button>{' '}
+                    or{' '}
+                    <button
+                      type="button"
+                      onClick={() => onSessionModeChange('remote')}
+                      className={`px-3 py-1 rounded-full text-[13px] font-bold transition-colors mx-1 ${
+                        sessionMode === 'remote'
+                          ? 'bg-green-600 text-white ring-2 ring-green-300'
+                          : 'bg-blue-500 text-white hover:bg-blue-600'
+                      }`}
+                    >
+                      with a friend
+                    </button>
+                    ?
+                  </div>
+                  {sessionMode === 'remote' && (
+                    <div className="bubble bubble-gray text-[13px]">
+                      nice — tap ENTER and create a room to share with your friend
+                    </div>
+                  )}
+                  {sessionMode === 'solo' && (
+                    <div className="bubble bubble-gray text-[13px]">
+                      solo vibes — tap ENTER when ur frame is picked
+                    </div>
+                  )}
                 </div>
 
-                <div className="mt-4 flex flex-col gap-2">
+                <div className="mt-4 flex flex-col gap-2 relative z-10">
                   <p className="text-[13px] font-semibold text-gray-500 uppercase tracking-wider mb-2">Pick ur vibe:</p>
                   <div className="grid grid-cols-2 gap-4 overflow-y-auto max-h-[240px] p-1">
                     {LAYOUTS.map((layout) => {
@@ -165,9 +187,9 @@ export function SetupScreen({
                           type="button"
                           onClick={() => onLayoutSelect(layout)}
                           className={`frame-card relative flex flex-col items-center gap-2 p-4 bg-white rounded-xl shadow-sm border border-gray-200 ${
-                            isSelected ? 'ring-4 ring-secondary scale-105' : 'hover:border-primary transition-all'
+                            isSelected ? 'ring-4 ring-secondary' : 'hover:border-primary transition-all'
                           }`}
-                          style={{ zIndex: isSelected ? 20 : 1 }}
+                          style={{ zIndex: isSelected ? 10 : 1 }}
                         >
                           <FramePreview layoutId={layout.id} />
                           <div className="text-center">
@@ -190,7 +212,8 @@ export function SetupScreen({
                 <button
                   type="button"
                   onClick={onEnter}
-                  className="px-12 py-2.5 bg-primary hover:bg-[#0062cc] text-on-primary text-[15px] font-semibold rounded-lg shadow-sm active:transform active:scale-95 transition-all w-full max-w-[200px]"
+                  disabled={!sessionMode}
+                  className="px-12 py-2.5 bg-primary hover:bg-[#0062cc] text-on-primary text-[15px] font-semibold rounded-lg shadow-sm active:transform active:scale-95 transition-all w-full max-w-[200px] disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100"
                 >
                   ENTER
                 </button>
