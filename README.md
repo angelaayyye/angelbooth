@@ -23,6 +23,15 @@ This starts both the web app (port 5173) and the sync server (port 3001).
 
 Open http://localhost:5173 and allow camera access.
 
+## Remote Duo on Vercel
+
+The live site uses `/api/sync` (HTTP polling) instead of WebSockets. One-time setup:
+
+1. Open your project in [Vercel](https://vercel.com) → **Storage** → **Upstash Redis** → **Connect**
+2. Redeploy the project
+
+Both friends can then create/join rooms on the deployed site. Local dev still uses the WebSocket server on port 3001 (`npm run dev`).
+
 ## Remote Duo How It Works
 
 1. Both friends open the site and click **Pick Your Frame**

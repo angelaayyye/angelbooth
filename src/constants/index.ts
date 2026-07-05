@@ -189,13 +189,22 @@ export function getWsUrl(): string {
     return import.meta.env.VITE_WS_URL;
   }
   const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-  // In dev, route through Vite proxy so localhost and 127.0.0.1 both work
   if (import.meta.env.DEV) {
     return `${protocol}//${window.location.host}/ws`;
   }
-  // Production: sync server must be hosted separately (e.g. Render)
   if (import.meta.env.VITE_SYNC_HOST) {
     return `${protocol}//${import.meta.env.VITE_SYNC_HOST}`;
   }
   return `${protocol}//${window.location.hostname}:3001`;
+}
+
+/** Use HTTP polling via /api/sync on Vercel (no separate WebSocket server). */
+export function useSyncApi(): boolean {
+  if (import.meta.env.VITE_WS_URL) return false;
+  if (import.meta.env.DEV) return false;
+  return true;
+}
+
+export function getSyncApiUrl(): string {
+  return '/api/sync';
 }

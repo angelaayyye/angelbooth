@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { DuoCapturePart, RoomState } from '../types';
-import { getWsUrl } from '../constants';
+import { getSyncApiUrl, getWsUrl, useSyncApi } from '../constants';
 
 type ServerMessage =
   | { type: 'connected'; playerId: string }
@@ -36,11 +36,18 @@ type ServerMessage =
   | { type: 'error'; message: string };
 
 const RECONNECT_DELAY_MS = 2000;
+const POLL_INTERVAL_MS = 800;
 
 export function useRoom(enabled = true) {
+  const useApi = useSyncApi();
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pollTimer = useRef<ReturnType<typeof setInterval> | null>(null);
   const intentionalClose = useRef(false);
+  const playerIdRef = useRef<string | null>(null);
+  const pollCursorRef = useRef(0);
+  const roomIdRef = useRef<string | null>(null);
+
   const [connected, setConnected] = useState(false);
   const [playerId, setPlayerId] = useState<string | null>(null);
   const [room, setRoom] = useState<RoomState | null>(null);
@@ -61,23 +68,25 @@ export function useRoom(enabled = true) {
   const [captureComplete, setCaptureComplete] = useState(false);
   const [waitingForPartner, setWaitingForPartner] = useState(false);
 
-  const handleMessage = useCallback((event: MessageEvent) => {
-    const msg: ServerMessage = JSON.parse(event.data);
-
+  const applyMessage = useCallback((msg: ServerMessage) => {
     switch (msg.type) {
       case 'connected':
+        playerIdRef.current = msg.playerId;
         setPlayerId(msg.playerId);
         setError(null);
         break;
       case 'room-joined':
         setRoom(msg.room);
+        roomIdRef.current = msg.room.id;
         setIsHost(msg.isHost);
         setPlayerId(msg.playerId);
+        playerIdRef.current = msg.playerId;
         setError(null);
         break;
       case 'room-updated':
       case 'session-started':
         setRoom(msg.room);
+        roomIdRef.current = msg.room.id;
         break;
       case 'countdown-started':
         setSyncCountdown({
@@ -118,7 +127,82 @@ export function useRoom(enabled = true) {
     }
   }, []);
 
-  const connect = useCallback(() => {
+  const handleWsMessage = useCallback(
+    (event: MessageEvent) => {
+      applyMessage(JSON.parse(event.data));
+    },
+    [applyMessage],
+  );
+
+  const pollOnce = useCallback(async () => {
+    const id = playerIdRef.current;
+    if (!id || intentionalClose.current) return;
+
+    try {
+      const res = await fetch(
+        `${getSyncApiUrl()}?playerId=${encodeURIComponent(id)}&cursor=${pollCursorRef.current}`,
+      );
+      const data = await res.json();
+
+      if (!res.ok) {
+        setConnected(false);
+        setError(data.error ?? 'Could not connect to sync server.');
+        return;
+      }
+
+      setConnected(true);
+      setError(null);
+      pollCursorRef.current = data.cursor ?? pollCursorRef.current;
+
+      for (const msg of data.messages ?? []) {
+        applyMessage(msg);
+      }
+    } catch {
+      setConnected(false);
+      setError('Could not connect to sync server. Retrying…');
+    }
+  }, [applyMessage]);
+
+  const connectApi = useCallback(async () => {
+    if (intentionalClose.current) return;
+
+    try {
+      const res = await fetch(getSyncApiUrl(), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'connect' }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        setConnected(false);
+        setError(
+          data.error ??
+            'Sync server unavailable. Add Upstash Redis in Vercel Storage, then redeploy.',
+        );
+        return;
+      }
+
+      playerIdRef.current = data.playerId;
+      setPlayerId(data.playerId);
+      pollCursorRef.current = 0;
+      setConnected(true);
+      setError(null);
+
+      for (const msg of data.messages ?? []) {
+        applyMessage(msg);
+      }
+
+      if (pollTimer.current) clearInterval(pollTimer.current);
+      pollTimer.current = setInterval(pollOnce, POLL_INTERVAL_MS);
+    } catch {
+      setConnected(false);
+      setError('Could not connect to sync server. Retrying…');
+      reconnectTimer.current = setTimeout(connectApi, RECONNECT_DELAY_MS);
+    }
+  }, [applyMessage, pollOnce]);
+
+  const connectWs = useCallback(() => {
     if (wsRef.current?.readyState === WebSocket.OPEN) return;
     if (wsRef.current?.readyState === WebSocket.CONNECTING) return;
 
@@ -135,7 +219,7 @@ export function useRoom(enabled = true) {
       setConnected(false);
       wsRef.current = null;
       if (!intentionalClose.current) {
-        reconnectTimer.current = setTimeout(connect, RECONNECT_DELAY_MS);
+        reconnectTimer.current = setTimeout(connectWs, RECONNECT_DELAY_MS);
       }
     };
 
@@ -145,28 +229,78 @@ export function useRoom(enabled = true) {
       }
     };
 
-    ws.onmessage = handleMessage;
-  }, [handleMessage]);
+    ws.onmessage = handleWsMessage;
+  }, [handleWsMessage]);
 
   useEffect(() => {
     if (!enabled) {
       intentionalClose.current = true;
       if (reconnectTimer.current) clearTimeout(reconnectTimer.current);
+      if (pollTimer.current) clearInterval(pollTimer.current);
       wsRef.current?.close();
       wsRef.current = null;
       setConnected(false);
       return;
     }
 
-    connect();
+    intentionalClose.current = false;
+
+    if (useApi) {
+      connectApi();
+    } else {
+      connectWs();
+    }
+
     return () => {
       intentionalClose.current = true;
       if (reconnectTimer.current) clearTimeout(reconnectTimer.current);
+      if (pollTimer.current) clearInterval(pollTimer.current);
       wsRef.current?.close();
     };
-  }, [connect, enabled]);
+  }, [enabled, useApi, connectApi, connectWs]);
 
-  const send = useCallback((message: object) => {
+  const postAction = useCallback(
+    async (message: Record<string, unknown>) => {
+      const payload = {
+        ...message,
+        playerId: playerIdRef.current,
+        roomId: roomIdRef.current,
+      };
+
+      try {
+        const res = await fetch(getSyncApiUrl(), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+          setError(data.error ?? 'Sync request failed.');
+          return false;
+        }
+
+        if (data.playerId) {
+          playerIdRef.current = data.playerId;
+          setPlayerId(data.playerId);
+        }
+        if (data.roomId) {
+          roomIdRef.current = data.roomId;
+        }
+
+        for (const msg of data.messages ?? []) {
+          applyMessage(msg);
+        }
+        return true;
+      } catch {
+        setError('Not connected to sync server. Please wait a moment and try again.');
+        return false;
+      }
+    },
+    [applyMessage],
+  );
+
+  const sendWs = useCallback((message: object) => {
     if (wsRef.current?.readyState === WebSocket.OPEN) {
       wsRef.current.send(JSON.stringify(message));
       return true;
@@ -174,6 +308,17 @@ export function useRoom(enabled = true) {
     setError('Not connected to sync server. Please wait a moment and try again.');
     return false;
   }, []);
+
+  const send = useCallback(
+    (message: object) => {
+      if (useApi) {
+        void postAction(message as Record<string, unknown>);
+        return true;
+      }
+      return sendWs(message);
+    },
+    [useApi, postAction, sendWs],
+  );
 
   const createRoom = useCallback(
     (name: string) => send({ type: 'create-room', name }),
@@ -213,6 +358,7 @@ export function useRoom(enabled = true) {
   const leaveRoom = useCallback(() => {
     send({ type: 'leave-room' });
     setRoom(null);
+    roomIdRef.current = null;
     setIsHost(false);
     setDuoSlotReady(null);
     setDuoPhotosComplete(null);
@@ -230,6 +376,11 @@ export function useRoom(enabled = true) {
   }, []);
 
   const clearDuoSlotReady = useCallback(() => setDuoSlotReady(null), []);
+
+  const retryConnect = useCallback(() => {
+    if (useApi) connectApi();
+    else connectWs();
+  }, [useApi, connectApi, connectWs]);
 
   return {
     connected,
@@ -252,6 +403,6 @@ export function useRoom(enabled = true) {
     resetCapture,
     clearDuoSlotReady,
     setError,
-    retryConnect: connect,
+    retryConnect,
   };
 }
