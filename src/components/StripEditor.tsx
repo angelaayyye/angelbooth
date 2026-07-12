@@ -8,7 +8,9 @@ import type {
 } from '../types';
 import { PhotoStrip } from './PhotoStrip';
 import { StickerPanel } from './StickerPanel';
+import { KstyleNav } from './KstyleNav';
 import { downloadStrip } from '../utils/canvas';
+import '../kstyle.css';
 
 interface StripEditorProps {
   layout: LayoutOption;
@@ -74,19 +76,11 @@ export function StripEditor({
   const selected = stickers.find((s) => s.id === selectedId);
 
   return (
-    <div className="strip-editor">
-      <div className="editor-header">
-        <button type="button" className="btn-ghost" onClick={onBack}>
-          ← Retake
-        </button>
-        <h2 className="section-title compact">Decorate</h2>
-        <button type="button" className="btn-ghost" onClick={onRestart}>
-          New ↻
-        </button>
-      </div>
+    <div className="kstyle-page kstyle-editor">
+      <KstyleNav step="decorate" onBack={onBack} />
 
-      <div className="editor-body">
-        <div className="editor-preview">
+      <div className="kstyle-editor-body">
+        <div className="kstyle-editor-preview">
           <PhotoStrip
             layout={layout}
             photos={photos}
@@ -99,9 +93,9 @@ export function StripEditor({
           />
 
           {selected && (
-            <div className="sticker-controls">
+            <div className="kstyle-sticker-controls">
               <label>
-                Size
+                size
                 <input
                   type="range"
                   min="0.5"
@@ -114,7 +108,7 @@ export function StripEditor({
                 />
               </label>
               <label>
-                Rotate
+                rotate
                 <input
                   type="range"
                   min="-180"
@@ -128,10 +122,10 @@ export function StripEditor({
               </label>
               <button
                 type="button"
-                className="btn-danger-sm"
+                className="kstyle-btn-danger"
                 onClick={deleteSelected}
               >
-                Delete
+                delete
               </button>
             </div>
           )}
@@ -140,9 +134,12 @@ export function StripEditor({
         <StickerPanel onAddSticker={addSticker} />
       </div>
 
-      <div className="editor-footer">
-        <button type="button" className="btn-primary btn-large" onClick={handleDownload}>
-          Save Photo Strip
+      <div className="kstyle-editor-footer">
+        <button type="button" className="kstyle-btn-secondary" onClick={onRestart}>
+          new session
+        </button>
+        <button type="button" className="kstyle-btn-primary" onClick={handleDownload}>
+          save strip ↓
         </button>
       </div>
     </div>

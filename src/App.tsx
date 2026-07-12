@@ -116,7 +116,7 @@ function App() {
 
   return (
     <div className="app">
-      {step !== 'welcome' && step !== 'setup' && step !== 'lobby' && step !== 'capture' && (
+      {step !== 'welcome' && step !== 'setup' && step !== 'lobby' && step !== 'capture' && step !== 'decorate' && (
         <header className="app-header">
           <div className="logo">
             <span className="logo-icon">📸</span>
@@ -136,7 +136,7 @@ function App() {
         </header>
       )}
 
-      <main className={`app-main ${step === 'welcome' || step === 'setup' || step === 'lobby' || step === 'capture' ? 'app-main-full' : ''}`}>
+      <main className={`app-main ${step === 'welcome' || step === 'setup' || step === 'lobby' || step === 'capture' || step === 'decorate' ? 'app-main-full' : ''}`}>
         {step === 'welcome' && (
           <WelcomeScreen onStart={() => setStep('setup')} />
         )}
@@ -144,10 +144,13 @@ function App() {
         {step === 'setup' && (
           <SetupScreen
             selectedLayout={layout}
+            selectedTheme={theme}
             sessionMode={sessionMode}
             onLayoutSelect={setLayout}
+            onThemeSelect={setTheme}
             onSessionModeChange={setSessionMode}
             onEnter={handleSetupContinue}
+            onBack={() => setStep('welcome')}
           />
         )}
 
@@ -215,7 +218,7 @@ function App() {
         )}
       </main>
 
-      {step !== 'welcome' && step !== 'setup' && step !== 'lobby' && step !== 'capture' && (
+      {step !== 'welcome' && step !== 'setup' && step !== 'lobby' && step !== 'capture' && step !== 'decorate' && (
         <footer className="app-footer">
           <p>Made with love — your online photobooth</p>
         </footer>
