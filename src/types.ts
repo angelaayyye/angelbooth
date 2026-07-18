@@ -37,17 +37,36 @@ export interface ThemeOption {
 export interface StickerDef {
   id: string;
   emoji: string;
-  category: StickerCategory;
+  pack: StickerPackId;
   label: string;
 }
 
-export type StickerCategory =
-  | 'hearts'
+export type StickerPackId =
+  | 'main'
+  | 'valentines'
   | 'cute'
-  | 'stars'
-  | 'text'
+  | 'vibes'
   | 'food'
-  | 'sparkle';
+  | 'sparkle'
+  | 'bw';
+
+export interface StickerPack {
+  id: StickerPackId;
+  name: string;
+  /** Short preview shown on the pack picker tile. */
+  preview: string;
+}
+
+export interface StripColorOption {
+  id: string;
+  name: string;
+  bg: string;
+  border: string;
+  text: string;
+  accent: string;
+}
+
+export type StripStyle = Pick<ThemeOption, 'bg' | 'border' | 'text' | 'accent'>;
 
 export interface PlacedSticker {
   id: string;
@@ -58,6 +77,16 @@ export interface PlacedSticker {
   scale: number;
   rotation: number;
 }
+
+export type PhotoFilterId =
+  | 'original'
+  | 'classic'
+  | 'vintage'
+  | 'pop'
+  | 'soft'
+  | 'matte'
+  | 'noir'
+  | 'cool';
 
 export interface CapturedPhoto {
   id: string;

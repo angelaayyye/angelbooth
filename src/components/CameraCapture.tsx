@@ -174,9 +174,12 @@ export function CameraCapture({
   }, [activeIndex]);
 
   useEffect(() => {
-    if (!waitingForPartner) return;
-    capturedRef.current = true;
-  }, [waitingForPartner]);
+    if (waitingForPartner) {
+      capturedRef.current = true;
+    } else if (syncCountdown === null) {
+      capturedRef.current = false;
+    }
+  }, [waitingForPartner, syncCountdown]);
 
   useEffect(() => {
     if (isRemote || localCountdown === null) return;
@@ -189,23 +192,36 @@ export function CameraCapture({
     return () => clearTimeout(timer);
   }, [isRemote, localCountdown, takePhoto]);
 
+  const tryRemoteCapture = useCallback(() => {
+    if (!syncCountdown || syncCountdown.photoIndex !== activeIndex) return;
+    const elapsed = Math.floor((Date.now() - syncCountdown.startedAt) / 1000);
+    const remainingSeconds = Math.max(0, syncCountdown.seconds - elapsed);
+    setRemoteDisplayCount(remainingSeconds);
+    if (remainingSeconds === 0 && !capturedRef.current && !waitingForPartner) {
+      takePhoto();
+    }
+  }, [syncCountdown, activeIndex, takePhoto, waitingForPartner]);
+
   useEffect(() => {
     if (!isRemote || !syncCountdown || syncCountdown.photoIndex !== activeIndex) {
       setRemoteDisplayCount(null);
       return;
     }
-    const tick = () => {
-      const elapsed = Math.floor((Date.now() - syncCountdown.startedAt) / 1000);
-      const remainingSeconds = Math.max(0, syncCountdown.seconds - elapsed);
-      setRemoteDisplayCount(remainingSeconds);
-      if (remainingSeconds === 0 && !capturedRef.current && !waitingForPartner) {
-        takePhoto();
+    tryRemoteCapture();
+    const interval = setInterval(tryRemoteCapture, 100);
+    return () => clearInterval(interval);
+  }, [isRemote, syncCountdown, activeIndex, tryRemoteCapture]);
+
+  useEffect(() => {
+    if (!isRemote || !syncCountdown) return;
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') {
+        tryRemoteCapture();
       }
     };
-    tick();
-    const interval = setInterval(tick, 100);
-    return () => clearInterval(interval);
-  }, [isRemote, syncCountdown, activeIndex, takePhoto, waitingForPartner]);
+    document.addEventListener('visibilitychange', onVisible);
+    return () => document.removeEventListener('visibilitychange', onVisible);
+  }, [isRemote, syncCountdown, tryRemoteCapture]);
 
   const displayCount = isRemote ? remoteDisplayCount : localCountdown;
 
@@ -331,7 +347,7 @@ export function CameraCapture({
               <div className="kstyle-shutter-inner" />
             </button>
             <span style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.7)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
-              {waitingForPartner ? 'wait…' : 'smile!'}
+              {waitingForPartner ? 'waiting for friend…' : 'smile!'}
             </span>
           </div>
         </div>

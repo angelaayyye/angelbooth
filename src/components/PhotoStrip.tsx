@@ -1,10 +1,17 @@
-import type { LayoutOption, ThemeOption, CapturedPhoto, PlacedSticker } from '../types';
+import type {
+  LayoutOption,
+  CapturedPhoto,
+  PlacedSticker,
+  PhotoFilterId,
+  StripStyle,
+} from '../types';
 import { PHOTO_GAP, STRIP_PADDING, STRIP_BORDER } from '../constants';
+import { DEFAULT_PHOTO_FILTER, getPhotoFilterCss } from '../utils/photoFilters';
 
 interface PhotoStripProps {
   layout: LayoutOption;
   photos: (CapturedPhoto | undefined)[];
-  theme: ThemeOption;
+  stripStyle: StripStyle;
   stickers?: PlacedSticker[];
   interactive?: boolean;
   selectedStickerId?: string | null;
@@ -12,13 +19,14 @@ interface PhotoStripProps {
   onStickerMove?: (id: string, x: number, y: number) => void;
   highlightSlot?: number | null;
   slotLabels?: (string | null)[];
+  photoFilter?: PhotoFilterId;
   className?: string;
 }
 
 export function PhotoStrip({
   layout,
   photos,
-  theme,
+  stripStyle,
   stickers = [],
   interactive = false,
   selectedStickerId,
@@ -26,8 +34,10 @@ export function PhotoStrip({
   onStickerMove,
   highlightSlot = null,
   slotLabels = [],
+  photoFilter = DEFAULT_PHOTO_FILTER,
   className = '',
 }: PhotoStripProps) {
+  const filterCss = getPhotoFilterCss(photoFilter);
   const handleStickerPointerDown = (
     e: React.PointerEvent,
     stickerId: string,
@@ -61,8 +71,8 @@ export function PhotoStrip({
     <div
       className={`photo-strip ${className}`}
       style={{
-        background: theme.bg,
-        border: `${STRIP_BORDER}px solid ${theme.border}`,
+        background: stripStyle.bg,
+        border: `${STRIP_BORDER}px solid ${stripStyle.border}`,
       }}
       onClick={() => interactive && onStickerSelect?.(null)}
     >
@@ -82,7 +92,11 @@ export function PhotoStrip({
             style={{ aspectRatio: `${layout.aspectRatio}` }}
           >
             {photos[i] ? (
-              <img src={photos[i].dataUrl} alt={`Photo ${i + 1}`} />
+              <img
+                src={photos[i].dataUrl}
+                alt={`Photo ${i + 1}`}
+                style={{ filter: filterCss }}
+              />
             ) : (
               <div className="photo-placeholder">
                 {slotLabels[i] ? (
@@ -115,9 +129,9 @@ export function PhotoStrip({
         ))}
       </div>
 
-      <div className="strip-footer" style={{ color: theme.text }}>
+      <div className="strip-footer" style={{ color: stripStyle.text }}>
         <div className="strip-footer-title">Photobooth</div>
-        <div className="strip-footer-date" style={{ color: theme.accent }}>
+        <div className="strip-footer-date" style={{ color: stripStyle.accent }}>
           {new Date().toLocaleDateString('en-US')}
         </div>
       </div>

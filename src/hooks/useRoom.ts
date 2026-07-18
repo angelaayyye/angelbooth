@@ -38,6 +38,7 @@ type ServerMessage =
 
 const RECONNECT_DELAY_MS = 2000;
 const POLL_INTERVAL_MS = 800;
+const PARTNER_WAIT_TIMEOUT_MS = 45_000;
 
 export function useRoom(enabled = true) {
   const useApi = useSyncApi();
@@ -363,12 +364,29 @@ export function useRoom(enabled = true) {
   );
 
   const sendPhoto = useCallback(
-    (photoIndex: number, dataUrl: string) => {
-      setWaitingForPartner(true);
-      return send({ type: 'photo-captured', photoIndex, dataUrl });
+    async (photoIndex: number, dataUrl: string) => {
+      const message = { type: 'photo-captured', photoIndex, dataUrl };
+      const ok = useApi
+        ? await postAction(message)
+        : sendWs(message);
+      if (ok) {
+        setWaitingForPartner(true);
+      }
+      return ok;
     },
-    [send],
+    [useApi, postAction, sendWs],
   );
+
+  useEffect(() => {
+    if (!waitingForPartner) return;
+    const timer = setTimeout(() => {
+      setWaitingForPartner(false);
+      setError(
+        'Timed out waiting for your friend. Make sure they are on the capture screen with camera access, then tap the shutter to try again.',
+      );
+    }, PARTNER_WAIT_TIMEOUT_MS);
+    return () => clearTimeout(timer);
+  }, [waitingForPartner]);
 
   const leaveRoom = useCallback(() => {
     send({ type: 'leave-room' });

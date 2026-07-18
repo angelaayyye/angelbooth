@@ -2,14 +2,22 @@ import { useState } from 'react';
 import type {
   CapturedPhoto,
   LayoutOption,
+  PhotoFilterId,
   PlacedSticker,
   StickerDef,
+  StripStyle,
   ThemeOption,
 } from '../types';
 import { PhotoStrip } from './PhotoStrip';
-import { StickerPanel } from './StickerPanel';
+import { DecoratePanel } from './DecoratePanel';
 import { KstyleNav } from './KstyleNav';
 import { downloadStrip } from '../utils/canvas';
+import {
+  getInitialStripColorId,
+  getStripColor,
+  stripColorToStyle,
+} from '../constants';
+import { DEFAULT_PHOTO_FILTER } from '../utils/photoFilters';
 import '../kstyle.css';
 
 interface StripEditorProps {
@@ -29,6 +37,10 @@ export function StripEditor({
 }: StripEditorProps) {
   const [stickers, setStickers] = useState<PlacedSticker[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [photoFilter, setPhotoFilter] = useState<PhotoFilterId>(DEFAULT_PHOTO_FILTER);
+  const [stripColorId, setStripColorId] = useState(() => getInitialStripColorId(theme));
+
+  const stripStyle: StripStyle = stripColorToStyle(getStripColor(stripColorId));
 
   const addSticker = (sticker: StickerDef) => {
     const newSticker: PlacedSticker = {
@@ -67,9 +79,10 @@ export function StripEditor({
     await downloadStrip(
       layout,
       photos,
-      theme,
+      stripStyle,
       stickers,
       `photobooth-${Date.now()}.png`,
+      photoFilter,
     );
   };
 
@@ -84,8 +97,9 @@ export function StripEditor({
           <PhotoStrip
             layout={layout}
             photos={photos}
-            theme={theme}
+            stripStyle={stripStyle}
             stickers={stickers}
+            photoFilter={photoFilter}
             interactive
             selectedStickerId={selectedId}
             onStickerSelect={setSelectedId}
@@ -131,7 +145,13 @@ export function StripEditor({
           )}
         </div>
 
-        <StickerPanel onAddSticker={addSticker} />
+        <DecoratePanel
+          stripColorId={stripColorId}
+          onStripColorChange={setStripColorId}
+          photoFilter={photoFilter}
+          onFilterChange={setPhotoFilter}
+          onAddSticker={addSticker}
+        />
       </div>
 
       <div className="kstyle-editor-footer">

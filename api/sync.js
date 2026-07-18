@@ -39,6 +39,25 @@ async function persistRooms(redis, manager) {
   }
 }
 
+async function mergePendingCapture(redis, room, roomId, photoIndex, playerId, dataUrl) {
+  if (!room) return;
+
+  const pendingKey = `${PREFIX}pending:${roomId}:${photoIndex}`;
+  await redis.hset(pendingKey, { [playerId]: dataUrl });
+  await redis.expire(pendingKey, ROOM_TTL);
+
+  const pendingAll = await redis.hgetall(pendingKey);
+  if (!room.pendingCaptures) room.pendingCaptures = {};
+  room.pendingCaptures[photoIndex] = {
+    ...(room.pendingCaptures[photoIndex] || {}),
+    ...pendingAll,
+  };
+}
+
+async function clearPendingCapture(redis, roomId, photoIndex) {
+  await redis.del(`${PREFIX}pending:${roomId}:${photoIndex}`);
+}
+
 function parseQueueItem(item) {
   if (typeof item === 'string') {
     return JSON.parse(item);
@@ -137,7 +156,39 @@ export default async function handler(req, res) {
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
     const manager = await loadRoomManager(redis);
     const currentPlayerId = body.playerId ?? null;
+
+    if (
+      redis &&
+      body.type === 'photo-captured' &&
+      body.roomId &&
+      currentPlayerId &&
+      typeof body.photoIndex === 'number' &&
+      body.dataUrl
+    ) {
+      const room = manager.getRoom(body.roomId);
+      await mergePendingCapture(
+        redis,
+        room,
+        body.roomId,
+        body.photoIndex,
+        currentPlayerId,
+        body.dataUrl,
+      );
+    }
+
     const result = processSyncMessage(manager, currentPlayerId, body);
+
+    if (
+      redis &&
+      body.type === 'photo-captured' &&
+      body.roomId &&
+      typeof body.photoIndex === 'number'
+    ) {
+      const room = manager.getRoom(body.roomId);
+      if (room?.photos?.[body.photoIndex]?.parts) {
+        await clearPendingCapture(redis, body.roomId, body.photoIndex);
+      }
+    }
 
     await persistRooms(redis, manager);
     await enqueueMessages(redis, result.outbound);

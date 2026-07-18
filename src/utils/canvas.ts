@@ -2,13 +2,15 @@ import type {
   CapturedPhoto,
   LayoutOption,
   PlacedSticker,
-  ThemeOption,
+  PhotoFilterId,
+  StripStyle,
 } from '../types';
 import {
   PHOTO_GAP,
   STRIP_BORDER,
   STRIP_PADDING,
 } from '../constants';
+import { DEFAULT_PHOTO_FILTER, getPhotoFilterCss } from './photoFilters';
 
 const EXPORT_WIDTH = 600;
 
@@ -30,10 +32,12 @@ export function computeStripDimensions(layout: LayoutOption) {
 export async function renderStripToCanvas(
   layout: LayoutOption,
   photos: CapturedPhoto[],
-  theme: ThemeOption,
+  stripStyle: StripStyle,
   stickers: PlacedSticker[],
   title?: string,
+  photoFilter: PhotoFilterId = DEFAULT_PHOTO_FILTER,
 ): Promise<HTMLCanvasElement> {
+  const filterCss = getPhotoFilterCss(photoFilter);
   const { cellWidth, cellHeight, innerWidth, totalHeight } =
     computeStripDimensions(layout);
 
@@ -45,11 +49,11 @@ export async function renderStripToCanvas(
   if (!ctx) throw new Error('Could not get canvas context');
 
   // Background
-  ctx.fillStyle = theme.bg;
+  ctx.fillStyle = stripStyle.bg;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   // Border frame
-  ctx.strokeStyle = theme.border;
+  ctx.strokeStyle = stripStyle.border;
   ctx.lineWidth = STRIP_BORDER;
   ctx.strokeRect(
     STRIP_BORDER / 2,
@@ -75,7 +79,7 @@ export async function renderStripToCanvas(
     const photo = photos[i];
     if (photo) {
       const img = await loadImage(photo.dataUrl);
-      drawCoverImage(ctx, img, x, y, cellWidth, cellHeight);
+      drawCoverImage(ctx, img, x, y, cellWidth, cellHeight, filterCss);
     } else {
       ctx.fillStyle = '#ccc';
       ctx.font = '24px sans-serif';
@@ -86,13 +90,13 @@ export async function renderStripToCanvas(
 
   // Title footer
   const footerY = startY + layout.rows * (cellHeight + PHOTO_GAP) - PHOTO_GAP + 12;
-  ctx.fillStyle = theme.text;
+  ctx.fillStyle = stripStyle.text;
   ctx.font = 'bold 14px sans-serif';
   ctx.textAlign = 'center';
   ctx.fillText(title || 'Photobooth', EXPORT_WIDTH / 2, footerY + 16);
 
   ctx.font = '11px sans-serif';
-  ctx.fillStyle = theme.accent;
+  ctx.fillStyle = stripStyle.accent;
   const dateStr = new Date().toLocaleDateString('en-US');
   ctx.fillText(dateStr, EXPORT_WIDTH / 2, footerY + 32);
 
@@ -135,6 +139,7 @@ function drawCoverImage(
   y: number,
   w: number,
   h: number,
+  filterCss = 'none',
 ) {
   const imgRatio = img.width / img.height;
   const boxRatio = w / h;
@@ -152,17 +157,28 @@ function drawCoverImage(
     sy = (img.height - sh) / 2;
   }
 
+  ctx.save();
+  ctx.filter = filterCss;
   ctx.drawImage(img, sx, sy, sw, sh, x, y, w, h);
+  ctx.restore();
 }
 
 export async function downloadStrip(
   layout: LayoutOption,
   photos: CapturedPhoto[],
-  theme: ThemeOption,
+  stripStyle: StripStyle,
   stickers: PlacedSticker[],
   filename = 'photobooth-strip.png',
+  photoFilter: PhotoFilterId = DEFAULT_PHOTO_FILTER,
 ) {
-  const canvas = await renderStripToCanvas(layout, photos, theme, stickers);
+  const canvas = await renderStripToCanvas(
+    layout,
+    photos,
+    stripStyle,
+    stickers,
+    undefined,
+    photoFilter,
+  );
   const link = document.createElement('a');
   link.download = filename;
   link.href = canvas.toDataURL('image/png');

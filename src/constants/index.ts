@@ -1,4 +1,4 @@
-import type { LayoutOption, ThemeOption, StickerDef } from '../types';
+import type { LayoutOption, ThemeOption, StickerDef, StickerPack, StripColorOption } from '../types';
 
 export const LAYOUTS: LayoutOption[] = [
   {
@@ -108,76 +108,139 @@ export const THEMES: ThemeOption[] = [
   },
 ];
 
+/** Strip background colours — inspired by classic booth print palettes. */
+export const STRIP_COLORS: StripColorOption[] = [
+  { id: 'white', name: 'White', bg: '#ffffff', border: '#1a1a1a', text: '#111111', accent: '#444444' },
+  { id: 'black', name: 'Black', bg: '#0a0a0a', border: '#ffffff', text: '#ffffff', accent: '#cccccc' },
+  { id: 'blush', name: 'Blush', bg: '#fce4ec', border: '#f48fb1', text: '#880e4f', accent: '#ec407a' },
+  { id: 'pink', name: 'Pink', bg: '#f8bbd0', border: '#ec407a', text: '#880e4f', accent: '#c2185b' },
+  { id: 'rose', name: 'Rose', bg: '#ffcdd2', border: '#e57373', text: '#b71c1c', accent: '#d32f2f' },
+  { id: 'sky', name: 'Sky', bg: '#e3f2fd', border: '#64b5f6', text: '#0d47a1', accent: '#1976d2' },
+  { id: 'blue', name: 'Blue', bg: '#90caf9', border: '#1565c0', text: '#0d47a1', accent: '#1976d2' },
+  { id: 'butter', name: 'Butter', bg: '#fff9c4', border: '#fbc02d', text: '#f57f17', accent: '#f9a825' },
+  { id: 'lilac', name: 'Lilac', bg: '#e1bee7', border: '#8e24aa', text: '#4a148c', accent: '#7b1fa2' },
+  { id: 'lavender', name: 'Lavender', bg: '#d1c4e9', border: '#5e35b1', text: '#311b92', accent: '#512da8' },
+  { id: 'cream', name: 'Cream', bg: '#efdfc4', border: '#a1887f', text: '#4e342e', accent: '#795548' },
+  { id: 'grey', name: 'Grey', bg: '#eeeeee', border: '#616161', text: '#212121', accent: '#424242' },
+  { id: 'navy', name: 'Navy', bg: '#1a237e', border: '#7986cb', text: '#e8eaf6', accent: '#9fa8da' },
+  { id: 'charcoal', name: 'Charcoal', bg: '#37474f', border: '#90a4ae', text: '#eceff1', accent: '#b0bec5' },
+];
+
+export const STICKER_PACKS: StickerPack[] = [
+  { id: 'main', name: 'Main', preview: '★✨📸' },
+  { id: 'valentines', name: 'Valentines', preview: '💕💋' },
+  { id: 'bw', name: 'B&W Pack', preview: '★♡美' },
+  { id: 'cute', name: 'Cute', preview: '🐰🌸' },
+  { id: 'vibes', name: 'Vibes', preview: '🔥👑' },
+  { id: 'food', name: 'Food', preview: '🧋🍰' },
+  { id: 'sparkle', name: 'Sparkle', preview: '✨🦋' },
+];
+
 export const STICKERS: StickerDef[] = [
-  { id: 'h1', emoji: '❤️', category: 'hearts', label: 'Red heart' },
-  { id: 'h2', emoji: '💕', category: 'hearts', label: 'Two hearts' },
-  { id: 'h3', emoji: '💖', category: 'hearts', label: 'Sparkling heart' },
-  { id: 'h4', emoji: '💗', category: 'hearts', label: 'Growing heart' },
-  { id: 'h5', emoji: '💘', category: 'hearts', label: 'Heart arrow' },
-  { id: 'h6', emoji: '💝', category: 'hearts', label: 'Heart box' },
-  { id: 'h7', emoji: '🩷', category: 'hearts', label: 'Pink heart' },
-  { id: 'h8', emoji: '💜', category: 'hearts', label: 'Purple heart' },
+  // Main — classic booth favourites
+  { id: 'm1', emoji: '⭐', pack: 'main', label: 'Star' },
+  { id: 'm2', emoji: '✨', pack: 'main', label: 'Sparkles' },
+  { id: 'm3', emoji: '📸', pack: 'main', label: 'Camera' },
+  { id: 'm4', emoji: '❤️', pack: 'main', label: 'Heart' },
+  { id: 'm5', emoji: '🌟', pack: 'main', label: 'Glowing star' },
+  { id: 'm6', emoji: '💫', pack: 'main', label: 'Dizzy' },
+  { id: 'm7', emoji: '🎀', pack: 'main', label: 'Ribbon' },
+  { id: 'm8', emoji: '👑', pack: 'main', label: 'Crown' },
+  { id: 'm9', emoji: '😍', pack: 'main', label: 'Heart eyes' },
+  { id: 'm10', emoji: '🌸', pack: 'main', label: 'Cherry blossom' },
 
-  { id: 'c1', emoji: '🐰', category: 'cute', label: 'Bunny' },
-  { id: 'c2', emoji: '🐻', category: 'cute', label: 'Bear' },
-  { id: 'c3', emoji: '🐱', category: 'cute', label: 'Cat' },
-  { id: 'c4', emoji: '🐶', category: 'cute', label: 'Dog' },
-  { id: 'c5', emoji: '🐼', category: 'cute', label: 'Panda' },
-  { id: 'c6', emoji: '🦊', category: 'cute', label: 'Fox' },
-  { id: 'c7', emoji: '🐸', category: 'cute', label: 'Frog' },
-  { id: 'c8', emoji: '🐥', category: 'cute', label: 'Chick' },
-  { id: 'c9', emoji: '🎀', category: 'cute', label: 'Ribbon' },
-  { id: 'c10', emoji: '🌸', category: 'cute', label: 'Cherry blossom' },
-  { id: 'c11', emoji: '🌷', category: 'cute', label: 'Tulip' },
-  { id: 'c12', emoji: '🍀', category: 'cute', label: 'Clover' },
+  // Valentines
+  { id: 'v1', emoji: '💕', pack: 'valentines', label: 'Two hearts' },
+  { id: 'v2', emoji: '💖', pack: 'valentines', label: 'Sparkling heart' },
+  { id: 'v3', emoji: '💗', pack: 'valentines', label: 'Growing heart' },
+  { id: 'v4', emoji: '💘', pack: 'valentines', label: 'Heart arrow' },
+  { id: 'v5', emoji: '💝', pack: 'valentines', label: 'Heart box' },
+  { id: 'v6', emoji: '🩷', pack: 'valentines', label: 'Pink heart' },
+  { id: 'v7', emoji: '💜', pack: 'valentines', label: 'Purple heart' },
+  { id: 'v8', emoji: '🤍', pack: 'valentines', label: 'White heart' },
+  { id: 'v9', emoji: '💋', pack: 'valentines', label: 'Kiss' },
+  { id: 'v10', emoji: '🥰', pack: 'valentines', label: 'Smiling hearts' },
+  { id: 'v11', emoji: '♥', pack: 'valentines', label: 'Heart suit' },
+  { id: 'v12', emoji: '💑', pack: 'valentines', label: 'Couple' },
 
-  { id: 's1', emoji: '⭐', category: 'stars', label: 'Star' },
-  { id: 's2', emoji: '🌟', category: 'stars', label: 'Glowing star' },
-  { id: 's3', emoji: '✨', category: 'stars', label: 'Sparkles' },
-  { id: 's4', emoji: '💫', category: 'stars', label: 'Dizzy' },
-  { id: 's5', emoji: '🌙', category: 'stars', label: 'Moon' },
-  { id: 's6', emoji: '☁️', category: 'stars', label: 'Cloud' },
-  { id: 's7', emoji: '🌈', category: 'stars', label: 'Rainbow' },
-  { id: 's8', emoji: '☀️', category: 'stars', label: 'Sun' },
+  // B&W — monochrome symbols like classic booth overlays
+  { id: 'b1', emoji: '★', pack: 'bw', label: 'Star' },
+  { id: 'b2', emoji: '✦', pack: 'bw', label: 'Sparkle star' },
+  { id: 'b3', emoji: '♡', pack: 'bw', label: 'Heart outline' },
+  { id: 'b4', emoji: '✿', pack: 'bw', label: 'Flower' },
+  { id: 'b5', emoji: '美', pack: 'bw', label: 'Beauty' },
+  { id: 'b6', emoji: '✧', pack: 'bw', label: 'Sparkle' },
+  { id: 'b7', emoji: '◇', pack: 'bw', label: 'Diamond' },
+  { id: 'b8', emoji: '○', pack: 'bw', label: 'Circle' },
+  { id: 'b9', emoji: '▪', pack: 'bw', label: 'Square' },
+  { id: 'b10', emoji: '✕', pack: 'bw', label: 'X mark' },
+  { id: 'b11', emoji: '♪', pack: 'bw', label: 'Music note' },
+  { id: 'b12', emoji: '✎', pack: 'bw', label: 'Pencil' },
 
-  { id: 't1', emoji: '💯', category: 'text', label: '100' },
-  { id: 't2', emoji: '🔥', category: 'text', label: 'Fire' },
-  { id: 't3', emoji: '👑', category: 'text', label: 'Crown' },
-  { id: 't4', emoji: '💅', category: 'text', label: 'Nails' },
-  { id: 't5', emoji: '😍', category: 'text', label: 'Heart eyes' },
-  { id: 't6', emoji: '🥰', category: 'text', label: 'Smiling hearts' },
-  { id: 't7', emoji: '😎', category: 'text', label: 'Cool' },
-  { id: 't8', emoji: '🤍', category: 'text', label: 'White heart' },
-  { id: 't9', emoji: '💋', category: 'text', label: 'Kiss' },
-  { id: 't10', emoji: '🎉', category: 'text', label: 'Party' },
+  // Cute
+  { id: 'c1', emoji: '🐰', pack: 'cute', label: 'Bunny' },
+  { id: 'c2', emoji: '🐻', pack: 'cute', label: 'Bear' },
+  { id: 'c3', emoji: '🐱', pack: 'cute', label: 'Cat' },
+  { id: 'c4', emoji: '🐶', pack: 'cute', label: 'Dog' },
+  { id: 'c5', emoji: '🐼', pack: 'cute', label: 'Panda' },
+  { id: 'c6', emoji: '🦊', pack: 'cute', label: 'Fox' },
+  { id: 'c7', emoji: '🐸', pack: 'cute', label: 'Frog' },
+  { id: 'c8', emoji: '🐥', pack: 'cute', label: 'Chick' },
+  { id: 'c9', emoji: '🌷', pack: 'cute', label: 'Tulip' },
+  { id: 'c10', emoji: '🍀', pack: 'cute', label: 'Clover' },
+  { id: 'c11', emoji: '🐾', pack: 'cute', label: 'Paw prints' },
+  { id: 'c12', emoji: '🌺', pack: 'cute', label: 'Hibiscus' },
 
-  { id: 'f1', emoji: '🧋', category: 'food', label: 'Bubble tea' },
-  { id: 'f2', emoji: '🍡', category: 'food', label: 'Dango' },
-  { id: 'f3', emoji: '🍰', category: 'food', label: 'Cake' },
-  { id: 'f4', emoji: '🍦', category: 'food', label: 'Ice cream' },
-  { id: 'f5', emoji: '🍓', category: 'food', label: 'Strawberry' },
-  { id: 'f6', emoji: '🍒', category: 'food', label: 'Cherry' },
-  { id: 'f7', emoji: '🍩', category: 'food', label: 'Donut' },
-  { id: 'f8', emoji: '🧁', category: 'food', label: 'Cupcake' },
+  // Vibes
+  { id: 't1', emoji: '💯', pack: 'vibes', label: '100' },
+  { id: 't2', emoji: '🔥', pack: 'vibes', label: 'Fire' },
+  { id: 't3', emoji: '💅', pack: 'vibes', label: 'Nails' },
+  { id: 't4', emoji: '😎', pack: 'vibes', label: 'Cool' },
+  { id: 't5', emoji: '🎉', pack: 'vibes', label: 'Party' },
+  { id: 't6', emoji: '🤩', pack: 'vibes', label: 'Star eyes' },
+  { id: 't7', emoji: '🙌', pack: 'vibes', label: 'Hands up' },
+  { id: 't8', emoji: '🫶', pack: 'vibes', label: 'Heart hands' },
 
-  { id: 'p1', emoji: '💎', category: 'sparkle', label: 'Diamond' },
-  { id: 'p2', emoji: '🦋', category: 'sparkle', label: 'Butterfly' },
-  { id: 'p3', emoji: '🎵', category: 'sparkle', label: 'Music' },
-  { id: 'p4', emoji: '📸', category: 'sparkle', label: 'Camera' },
-  { id: 'p5', emoji: '💡', category: 'sparkle', label: 'Light bulb' },
-  { id: 'p6', emoji: '🎀', category: 'sparkle', label: 'Bow' },
-  { id: 'p7', emoji: '🪄', category: 'sparkle', label: 'Magic wand' },
-  { id: 'p8', emoji: '🫧', category: 'sparkle', label: 'Bubbles' },
+  // Food
+  { id: 'f1', emoji: '🧋', pack: 'food', label: 'Bubble tea' },
+  { id: 'f2', emoji: '🍡', pack: 'food', label: 'Dango' },
+  { id: 'f3', emoji: '🍰', pack: 'food', label: 'Cake' },
+  { id: 'f4', emoji: '🍦', pack: 'food', label: 'Ice cream' },
+  { id: 'f5', emoji: '🍓', pack: 'food', label: 'Strawberry' },
+  { id: 'f6', emoji: '🍒', pack: 'food', label: 'Cherry' },
+  { id: 'f7', emoji: '🍩', pack: 'food', label: 'Donut' },
+  { id: 'f8', emoji: '🧁', pack: 'food', label: 'Cupcake' },
+
+  // Sparkle
+  { id: 'p1', emoji: '💎', pack: 'sparkle', label: 'Diamond' },
+  { id: 'p2', emoji: '🦋', pack: 'sparkle', label: 'Butterfly' },
+  { id: 'p3', emoji: '🎵', pack: 'sparkle', label: 'Music' },
+  { id: 'p4', emoji: '💡', pack: 'sparkle', label: 'Light bulb' },
+  { id: 'p5', emoji: '🪄', pack: 'sparkle', label: 'Magic wand' },
+  { id: 'p6', emoji: '🫧', pack: 'sparkle', label: 'Bubbles' },
+  { id: 'p7', emoji: '🌙', pack: 'sparkle', label: 'Moon' },
+  { id: 'p8', emoji: '🌈', pack: 'sparkle', label: 'Rainbow' },
+  { id: 'p9', emoji: '☁️', pack: 'sparkle', label: 'Cloud' },
+  { id: 'p10', emoji: '☀️', pack: 'sparkle', label: 'Sun' },
 ];
 
-export const STICKER_CATEGORIES = [
-  { id: 'hearts' as const, label: 'Hearts' },
-  { id: 'cute' as const, label: 'Cute' },
-  { id: 'stars' as const, label: 'Stars' },
-  { id: 'text' as const, label: 'Vibes' },
-  { id: 'food' as const, label: 'Food' },
-  { id: 'sparkle' as const, label: 'Sparkle' },
-];
+export function getStripColor(id: string): StripColorOption {
+  return STRIP_COLORS.find((c) => c.id === id) ?? STRIP_COLORS[0];
+}
+
+export function getInitialStripColorId(theme: ThemeOption): string {
+  const match = STRIP_COLORS.find((c) => c.bg === theme.bg);
+  return match?.id ?? 'white';
+}
+
+export function stripColorToStyle(color: StripColorOption) {
+  return {
+    bg: color.bg,
+    border: color.border,
+    text: color.text,
+    accent: color.accent,
+  };
+}
 
 export const COUNTDOWN_SECONDS = 3;
 export const PHOTO_GAP = 8;
