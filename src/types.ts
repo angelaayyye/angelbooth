@@ -78,15 +78,7 @@ export interface PlacedSticker {
   rotation: number;
 }
 
-export type PhotoFilterId =
-  | 'original'
-  | 'classic'
-  | 'vintage'
-  | 'pop'
-  | 'soft'
-  | 'matte'
-  | 'noir'
-  | 'cool';
+export type PhotoFilterId = 'pop' | 'sepia' | 'bw' | 'glow';
 
 export interface CapturedPhoto {
   id: string;

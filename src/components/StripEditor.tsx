@@ -104,6 +104,8 @@ export function StripEditor({
             selectedStickerId={selectedId}
             onStickerSelect={setSelectedId}
             onStickerMove={moveSticker}
+            className="photo-strip--editor"
+            compact
           />
 
           {selected && (

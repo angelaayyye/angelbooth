@@ -20,6 +20,7 @@ interface PhotoStripProps {
   highlightSlot?: number | null;
   slotLabels?: (string | null)[];
   photoFilter?: PhotoFilterId;
+  compact?: boolean;
   className?: string;
 }
 
@@ -35,9 +36,13 @@ export function PhotoStrip({
   highlightSlot = null,
   slotLabels = [],
   photoFilter = DEFAULT_PHOTO_FILTER,
+  compact = false,
   className = '',
 }: PhotoStripProps) {
   const filterCss = getPhotoFilterCss(photoFilter);
+  const gap = compact ? 4 : PHOTO_GAP;
+  const padding = compact ? 8 : STRIP_PADDING;
+  const border = compact ? 2 : STRIP_BORDER;
   const handleStickerPointerDown = (
     e: React.PointerEvent,
     stickerId: string,
@@ -72,7 +77,7 @@ export function PhotoStrip({
       className={`photo-strip ${className}`}
       style={{
         background: stripStyle.bg,
-        border: `${STRIP_BORDER}px solid ${stripStyle.border}`,
+        border: `${border}px solid ${stripStyle.border}`,
       }}
       onClick={() => interactive && onStickerSelect?.(null)}
     >
@@ -81,8 +86,8 @@ export function PhotoStrip({
         style={{
           gridTemplateColumns: `repeat(${layout.cols}, minmax(0, 1fr))`,
           gridTemplateRows: `repeat(${layout.rows}, minmax(0, 1fr))`,
-          gap: `${PHOTO_GAP}px`,
-          padding: `${STRIP_PADDING}px`,
+          gap: `${gap}px`,
+          padding: `${padding}px`,
         }}
       >
         {Array.from({ length: layout.photoCount }).map((_, i) => (
