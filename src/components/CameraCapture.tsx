@@ -287,7 +287,12 @@ export function CameraCapture({
           <div className="kstyle-viewfinder-stage">
             <div
               className="kstyle-frame-slot"
-              style={{ aspectRatio: `${layout.aspectRatio}` }}
+              style={
+                {
+                  aspectRatio: `${layout.aspectRatio}`,
+                  '--slot-ratio': String(layout.aspectRatio),
+                } as React.CSSProperties
+              }
             >
               {error ? (
                 <div className="kstyle-frame-fill flex flex-col items-center justify-center gap-4 p-6 text-center text-white/80">
@@ -373,10 +378,10 @@ export function CameraCapture({
           <PreviewStrip layout={layout} photos={photos} activeIndex={activeIndex} />
           <button
             type="button"
-            className="kstyle-btn-primary w-full justify-center text-sm py-2"
+            className="kstyle-btn-primary w-full justify-center text-xs py-1.5"
             onClick={onComplete}
             disabled={!allCaptured}
-            style={{ opacity: allCaptured ? 1 : 0.4 }}
+            style={{ opacity: allCaptured ? 1 : 0.4, flexShrink: 0 }}
           >
             done →
           </button>

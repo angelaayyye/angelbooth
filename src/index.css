@@ -46,6 +46,20 @@ body {
   flex-direction: column;
 }
 
+.app:has(.kstyle-capture),
+.app:has(.kstyle-editor) {
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
+}
+
+.app:has(.kstyle-capture) .app-main-full,
+.app:has(.kstyle-editor) .app-main-full {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
 .app-header {
   display: flex;
   align-items: center;
