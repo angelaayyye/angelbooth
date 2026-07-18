@@ -460,12 +460,17 @@ body {
 }
 
 .photo-strip {
-  border-radius: 4px;
+  border-radius: 12px;
   width: 100%;
   max-width: 280px;
   margin: 0 auto;
   position: relative;
   overflow: hidden;
+  box-shadow: 0 8px 28px rgba(244, 143, 177, 0.18);
+}
+
+.photo-strip--booth {
+  border-radius: 14px;
 }
 
 .photo-grid {
@@ -474,12 +479,17 @@ body {
 }
 
 .photo-cell {
-  background: #e8e8e8;
+  background: #f3e6ea;
   overflow: hidden;
-  border-radius: 2px;
+  border-radius: 10px;
   width: 100%;
   min-height: 0;
   min-width: 0;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.55);
+}
+
+.photo-cell--booth {
+  border-radius: 12px;
 }
 
 .photo-cell.highlight {
@@ -534,16 +544,18 @@ body {
 
 .strip-footer {
   text-align: center;
-  padding: 8px 12px 12px;
+  padding: 10px 12px 14px;
 }
 
 .strip-footer-title {
-  font-size: 0.75rem;
-  font-weight: 700;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
 }
 
 .strip-footer-date {
-  font-size: 0.65rem;
+  font-size: 0.6rem;
+  letter-spacing: 0.06em;
 }
 
 /* Room lobby */

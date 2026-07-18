@@ -11,6 +11,7 @@ import {
   STRIP_PADDING,
 } from '../constants';
 import { DEFAULT_PHOTO_FILTER, getPhotoFilterCss } from './photoFilters';
+import { drawStripPattern } from './stripPattern';
 
 const EXPORT_WIDTH = 600;
 
@@ -48,22 +49,27 @@ export async function renderStripToCanvas(
   const ctx = canvas.getContext('2d');
   if (!ctx) throw new Error('Could not get canvas context');
 
-  // Background
+  // Background + Photoism-style polka dots
   ctx.fillStyle = stripStyle.bg;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
+  drawStripPattern(ctx, stripStyle.pattern, canvas.width, canvas.height);
 
-  // Border frame
+  // Soft border frame
   ctx.strokeStyle = stripStyle.border;
   ctx.lineWidth = STRIP_BORDER;
-  ctx.strokeRect(
+  roundRect(
+    ctx,
     STRIP_BORDER / 2,
     STRIP_BORDER / 2,
     canvas.width - STRIP_BORDER,
     canvas.height - STRIP_BORDER,
+    10,
   );
+  ctx.stroke();
 
   const startX = STRIP_PADDING + STRIP_BORDER;
   const startY = STRIP_PADDING + STRIP_BORDER;
+  const radius = 10;
 
   // Draw photos
   for (let i = 0; i < layout.photoCount; i++) {
@@ -73,13 +79,18 @@ export async function renderStripToCanvas(
     const x = startX + col * (cellWidth + PHOTO_GAP);
     const y = startY + row * (cellHeight + PHOTO_GAP);
 
-    ctx.fillStyle = '#ddd';
-    ctx.fillRect(x, y, cellWidth, cellHeight);
+    ctx.fillStyle = '#f0e6ea';
+    roundRect(ctx, x, y, cellWidth, cellHeight, radius);
+    ctx.fill();
 
     const photo = photos[i];
     if (photo) {
       const img = await loadImage(photo.dataUrl);
+      ctx.save();
+      roundRect(ctx, x, y, cellWidth, cellHeight, radius);
+      ctx.clip();
       drawCoverImage(ctx, img, x, y, cellWidth, cellHeight, filterCss);
+      ctx.restore();
     } else {
       ctx.fillStyle = '#ccc';
       ctx.font = '24px sans-serif';
@@ -121,6 +132,24 @@ export async function renderStripToCanvas(
   }
 
   return canvas;
+}
+
+function roundRect(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  r: number,
+) {
+  const radius = Math.min(r, w / 2, h / 2);
+  ctx.beginPath();
+  ctx.moveTo(x + radius, y);
+  ctx.arcTo(x + w, y, x + w, y + h, radius);
+  ctx.arcTo(x + w, y + h, x, y + h, radius);
+  ctx.arcTo(x, y + h, x, y, radius);
+  ctx.arcTo(x, y, x + w, y, radius);
+  ctx.closePath();
 }
 
 function loadImage(src: string): Promise<HTMLImageElement> {

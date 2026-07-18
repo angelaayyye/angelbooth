@@ -6,6 +6,10 @@ import {
   STICKER_PACKS,
 } from '../constants';
 import { PHOTO_FILTERS } from '../utils/photoFilters';
+import {
+  getStripPatternCss,
+  getStripPatternSize,
+} from '../utils/stripPattern';
 
 type DecorateTab = 'colours' | 'filters' | 'stickers';
 
@@ -31,7 +35,7 @@ export function DecoratePanel({
   onAddSticker,
 }: DecoratePanelProps) {
   const [tab, setTab] = useState<DecorateTab>('colours');
-  const [stickerPack, setStickerPack] = useState<StickerPackId>('main');
+  const [stickerPack, setStickerPack] = useState<StickerPackId>('puffy');
 
   const packStickers = STICKERS.filter((s) => s.pack === stickerPack);
 
@@ -60,7 +64,12 @@ export function DecoratePanel({
                 className={stripColorId === color.id ? 'active' : ''}
                 onClick={() => onStripColorChange(color.id)}
                 title={color.name}
-                style={{ background: color.bg }}
+                style={{
+                  backgroundColor: color.bg,
+                  backgroundImage: getStripPatternCss(color.pattern),
+                  backgroundSize: getStripPatternSize(color.pattern),
+                  borderColor: color.border,
+                }}
                 aria-label={color.name}
               />
             ))}

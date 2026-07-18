@@ -54,27 +54,51 @@ export function useCamera({
     setIsReady(false);
   }, []);
 
-  const capture = useCallback((): string | null => {
-    const video = videoRef.current;
-    if (!video || !isReady || video.videoWidth === 0 || video.videoHeight === 0) {
-      return null;
-    }
+  /** Capture cropped to the strip slot aspect ratio (width / height). */
+  const capture = useCallback(
+    (aspectRatio = 3 / 4): string | null => {
+      const video = videoRef.current;
+      if (!video || !isReady || video.videoWidth === 0 || video.videoHeight === 0) {
+        return null;
+      }
 
-    const canvas = document.createElement('canvas');
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
+      const vw = video.videoWidth;
+      const vh = video.videoHeight;
+      const videoRatio = vw / vh;
 
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return null;
+      let sx = 0;
+      let sy = 0;
+      let sw = vw;
+      let sh = vh;
 
-    if (mirrored) {
-      ctx.translate(canvas.width, 0);
-      ctx.scale(-1, 1);
-    }
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      if (videoRatio > aspectRatio) {
+        sw = Math.round(vh * aspectRatio);
+        sx = Math.round((vw - sw) / 2);
+      } else {
+        sh = Math.round(vw / aspectRatio);
+        sy = Math.round((vh - sh) / 2);
+      }
 
-    return canvas.toDataURL('image/jpeg', 0.92);
-  }, [isReady, mirrored]);
+      const outW = Math.min(900, sw);
+      const outH = Math.round(outW / aspectRatio);
+
+      const canvas = document.createElement('canvas');
+      canvas.width = outW;
+      canvas.height = outH;
+
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return null;
+
+      if (mirrored) {
+        ctx.translate(outW, 0);
+        ctx.scale(-1, 1);
+      }
+      ctx.drawImage(video, sx, sy, sw, sh, 0, 0, outW, outH);
+
+      return canvas.toDataURL('image/jpeg', 0.92);
+    },
+    [isReady, mirrored],
+  );
 
   const getStream = useCallback(() => streamRef.current, []);
 

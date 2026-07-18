@@ -39,7 +39,7 @@ function PreviewStrip({
   activeIndex: number;
 }) {
   return (
-    <div className="flex flex-col gap-1.5 flex-1 overflow-y-auto">
+    <div className="kstyle-preview-strip">
       {Array.from({ length: layout.photoCount }).map((_, i) => {
         const photo = photos[i];
         const isCurrent = i === activeIndex && !photo;
@@ -51,7 +51,7 @@ function PreviewStrip({
               src={photo.dataUrl}
               alt={`Photo ${i + 1}`}
               className="kstyle-preview-slot-filled"
-              style={{ minHeight: '2.5rem' }}
+              style={{ aspectRatio: `${layout.aspectRatio}` }}
             />
           );
         }
@@ -60,6 +60,7 @@ function PreviewStrip({
           <div
             key={`empty-${i}`}
             className={`kstyle-preview-empty ${isCurrent ? 'kstyle-preview-current' : ''}`}
+            style={{ aspectRatio: `${layout.aspectRatio}` }}
           >
             +
           </div>
@@ -115,11 +116,16 @@ export function CameraCapture({
   const filledCount = photos.filter(Boolean).length;
   const allCaptured = filledCount >= layout.photoCount;
 
+  // Solo: match strip slot. Duo: each half of the merged slot.
+  const captureAspect = isRemote
+    ? layout.aspectRatio / 2
+    : layout.aspectRatio;
+
   const takePhoto = useCallback(() => {
     if (capturedRef.current) return;
     capturedRef.current = true;
 
-    const dataUrl = capture();
+    const dataUrl = capture(captureAspect);
     if (!dataUrl) {
       capturedRef.current = false;
       return;
@@ -145,6 +151,7 @@ export function CameraCapture({
     }
   }, [
     capture,
+    captureAspect,
     isRemote,
     onPhotoCaptured,
     activeIndex,
@@ -277,78 +284,87 @@ export function CameraCapture({
 
       <div className="kstyle-capture-body">
         <div className="kstyle-viewfinder">
-          {error ? (
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 p-6 text-center text-white/80">
-              <p>{error}</p>
-              <button type="button" className="kstyle-btn-primary" onClick={start}>
-                try again
-              </button>
-            </div>
-          ) : isRemote ? (
-            <div className="absolute inset-0 flex">
-              <div className="relative flex-1 min-w-0">
+          <div className="kstyle-viewfinder-stage">
+            <div
+              className="kstyle-frame-slot"
+              style={{ aspectRatio: `${layout.aspectRatio}` }}
+            >
+              {error ? (
+                <div className="kstyle-frame-fill flex flex-col items-center justify-center gap-4 p-6 text-center text-white/80">
+                  <p>{error}</p>
+                  <button type="button" className="kstyle-btn-primary" onClick={start}>
+                    try again
+                  </button>
+                </div>
+              ) : isRemote ? (
+                <div className="kstyle-frame-fill kstyle-duo-frame">
+                  <div className="kstyle-duo-half">
+                    <video
+                      ref={videoRef}
+                      className={`kstyle-frame-video ${mirrored ? 'kstyle-camera-mirror' : ''}`}
+                      playsInline
+                      muted
+                      autoPlay
+                    />
+                    <span className="kstyle-duo-label">you</span>
+                  </div>
+                  <div className="kstyle-duo-divider" />
+                  <div className="kstyle-duo-half">
+                    <video
+                      ref={remoteVideoRef}
+                      className="kstyle-frame-video"
+                      playsInline
+                      autoPlay
+                    />
+                    {!partnerConnected && (
+                      <div className="kstyle-duo-waiting">
+                        friend connecting…
+                      </div>
+                    )}
+                    <span className="kstyle-duo-label">friend</span>
+                  </div>
+                </div>
+              ) : (
                 <video
                   ref={videoRef}
-                  className={`absolute inset-0 w-full h-full object-cover ${mirrored ? 'kstyle-camera-mirror' : ''}`}
+                  className={`kstyle-frame-video ${mirrored ? 'kstyle-camera-mirror' : ''}`}
                   playsInline
                   muted
                   autoPlay
                 />
-                <span className="kstyle-duo-label">you</span>
-              </div>
-              <div className="w-0.5 bg-white/80 shrink-0" />
-              <div className="relative flex-1 min-w-0 bg-zinc-900">
-                <video
-                  ref={remoteVideoRef}
-                  className="absolute inset-0 w-full h-full object-cover"
-                  playsInline
-                  autoPlay
-                />
-                {!partnerConnected && (
-                  <div className="absolute inset-0 flex items-center justify-center text-white/50 text-sm px-4 text-center">
-                    friend connecting…
-                  </div>
-                )}
-                <span className="kstyle-duo-label">friend</span>
-              </div>
-            </div>
-          ) : (
-            <video
-              ref={videoRef}
-              className={`absolute inset-0 w-full h-full object-cover ${mirrored ? 'kstyle-camera-mirror' : ''}`}
-              playsInline
-              muted
-              autoPlay
-            />
-          )}
+              )}
 
-          {!isReady && !error && (
-            <div className="absolute inset-0 flex items-center justify-center text-white/60 text-sm z-10">
-              loading camera…
-            </div>
-          )}
+              {!isReady && !error && (
+                <div className="kstyle-frame-overlay">loading camera…</div>
+              )}
 
-          {displayCount !== null && (
-            <div className="kstyle-countdown">
-              <span className="kstyle-countdown-num">
-                {displayCount > 0 ? displayCount : '📸'}
+              {displayCount !== null && (
+                <div className="kstyle-countdown">
+                  <span className="kstyle-countdown-num">
+                    {displayCount > 0 ? displayCount : '📸'}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            <p className="kstyle-frame-hint">
+              this is your strip photo frame
+            </p>
+
+            <div className="kstyle-shutter-wrap kstyle-shutter-wrap--framed">
+              <button
+                type="button"
+                className="kstyle-shutter"
+                onClick={startCountdown}
+                disabled={shutterDisabled}
+                aria-label="Take photo"
+              >
+                <div className="kstyle-shutter-inner" />
+              </button>
+              <span className="kstyle-shutter-label">
+                {waitingForPartner ? 'waiting for friend…' : 'smile!'}
               </span>
             </div>
-          )}
-
-          <div className="kstyle-shutter-wrap">
-            <button
-              type="button"
-              className="kstyle-shutter"
-              onClick={startCountdown}
-              disabled={shutterDisabled}
-              aria-label="Take photo"
-            >
-              <div className="kstyle-shutter-inner" />
-            </button>
-            <span style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.7)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
-              {waitingForPartner ? 'waiting for friend…' : 'smile!'}
-            </span>
           </div>
         </div>
 

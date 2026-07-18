@@ -7,6 +7,10 @@ import type {
 } from '../types';
 import { PHOTO_GAP, STRIP_PADDING, STRIP_BORDER } from '../constants';
 import { DEFAULT_PHOTO_FILTER, getPhotoFilterCss } from '../utils/photoFilters';
+import {
+  getStripPatternCss,
+  getStripPatternSize,
+} from '../utils/stripPattern';
 
 interface PhotoStripProps {
   layout: LayoutOption;
@@ -72,11 +76,16 @@ export function PhotoStrip({
     window.addEventListener('pointerup', onUp);
   };
 
+  const patternCss = getStripPatternCss(stripStyle.pattern);
+  const patternSize = getStripPatternSize(stripStyle.pattern);
+
   return (
     <div
-      className={`photo-strip ${className}`}
+      className={`photo-strip photo-strip--booth ${className}`}
       style={{
-        background: stripStyle.bg,
+        backgroundColor: stripStyle.bg,
+        backgroundImage: patternCss,
+        backgroundSize: patternSize,
         border: `${border}px solid ${stripStyle.border}`,
       }}
       onClick={() => interactive && onStickerSelect?.(null)}
@@ -93,7 +102,7 @@ export function PhotoStrip({
         {Array.from({ length: layout.photoCount }).map((_, i) => (
           <div
             key={i}
-            className={`photo-cell ${highlightSlot === i ? 'highlight' : ''}`}
+            className={`photo-cell photo-cell--booth ${highlightSlot === i ? 'highlight' : ''}`}
             style={{ aspectRatio: `${layout.aspectRatio}` }}
           >
             {photos[i] ? (

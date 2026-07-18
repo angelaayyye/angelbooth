@@ -42,12 +42,11 @@ export interface StickerDef {
 }
 
 export type StickerPackId =
-  | 'main'
+  | 'puffy'
+  | 'coquette'
+  | 'kawaii'
   | 'valentines'
-  | 'cute'
-  | 'vibes'
-  | 'food'
-  | 'sparkle'
+  | 'soft'
   | 'bw';
 
 export interface StickerPack {
@@ -57,6 +56,14 @@ export interface StickerPack {
   preview: string;
 }
 
+export type StripPattern =
+  | 'solid'
+  | 'dots-pink'
+  | 'dots-red'
+  | 'dots-blue'
+  | 'dots-cream'
+  | 'dots-white';
+
 export interface StripColorOption {
   id: string;
   name: string;
@@ -64,9 +71,15 @@ export interface StripColorOption {
   border: string;
   text: string;
   accent: string;
+  pattern?: StripPattern;
 }
 
-export type StripStyle = Pick<ThemeOption, 'bg' | 'border' | 'text' | 'accent'>;
+export type StripStyle = Pick<
+  ThemeOption,
+  'bg' | 'border' | 'text' | 'accent'
+> & {
+  pattern?: StripPattern;
+};
 
 export interface PlacedSticker {
   id: string;
