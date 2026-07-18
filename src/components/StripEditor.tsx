@@ -6,24 +6,18 @@ import type {
   PlacedSticker,
   StickerDef,
   StripStyle,
-  ThemeOption,
 } from '../types';
 import { PhotoStrip } from './PhotoStrip';
 import { DecoratePanel } from './DecoratePanel';
 import { KstyleNav } from './KstyleNav';
 import { downloadStrip } from '../utils/canvas';
-import {
-  getInitialStripColorId,
-  getStripColor,
-  stripColorToStyle,
-} from '../constants';
+import { getStripColor, stripColorToStyle } from '../constants';
 import { DEFAULT_PHOTO_FILTER } from '../utils/photoFilters';
 import '../kstyle.css';
 
 interface StripEditorProps {
   layout: LayoutOption;
   photos: CapturedPhoto[];
-  theme: ThemeOption;
   onBack: () => void;
   onRestart: () => void;
 }
@@ -31,14 +25,13 @@ interface StripEditorProps {
 export function StripEditor({
   layout,
   photos,
-  theme,
   onBack,
   onRestart,
 }: StripEditorProps) {
   const [stickers, setStickers] = useState<PlacedSticker[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [photoFilter, setPhotoFilter] = useState<PhotoFilterId>(DEFAULT_PHOTO_FILTER);
-  const [stripColorId, setStripColorId] = useState(() => getInitialStripColorId(theme));
+  const [stripColorId, setStripColorId] = useState('white');
 
   const stripStyle: StripStyle = stripColorToStyle(getStripColor(stripColorId));
 
@@ -93,67 +86,69 @@ export function StripEditor({
       <KstyleNav step="decorate" onBack={onBack} />
 
       <div className="kstyle-editor-body">
-        <div className="kstyle-editor-preview">
-          <PhotoStrip
-            layout={layout}
-            photos={photos}
-            stripStyle={stripStyle}
-            stickers={stickers}
+        <div className="kstyle-editor-stage">
+          <div className="kstyle-editor-preview">
+            <PhotoStrip
+              layout={layout}
+              photos={photos}
+              stripStyle={stripStyle}
+              stickers={stickers}
+              photoFilter={photoFilter}
+              interactive
+              selectedStickerId={selectedId}
+              onStickerSelect={setSelectedId}
+              onStickerMove={moveSticker}
+              className="photo-strip--editor"
+              compact
+            />
+
+            {selected && (
+              <div className="kstyle-sticker-controls">
+                <label>
+                  size
+                  <input
+                    type="range"
+                    min="0.5"
+                    max="2.5"
+                    step="0.1"
+                    value={selected.scale}
+                    onChange={(e) =>
+                      updateSelected({ scale: parseFloat(e.target.value) })
+                    }
+                  />
+                </label>
+                <label>
+                  rotate
+                  <input
+                    type="range"
+                    min="-180"
+                    max="180"
+                    step="5"
+                    value={selected.rotation}
+                    onChange={(e) =>
+                      updateSelected({ rotation: parseInt(e.target.value) })
+                    }
+                  />
+                </label>
+                <button
+                  type="button"
+                  className="kstyle-btn-danger"
+                  onClick={deleteSelected}
+                >
+                  delete
+                </button>
+              </div>
+            )}
+          </div>
+
+          <DecoratePanel
+            stripColorId={stripColorId}
+            onStripColorChange={setStripColorId}
             photoFilter={photoFilter}
-            interactive
-            selectedStickerId={selectedId}
-            onStickerSelect={setSelectedId}
-            onStickerMove={moveSticker}
-            className="photo-strip--editor"
-            compact
+            onFilterChange={setPhotoFilter}
+            onAddSticker={addSticker}
           />
-
-          {selected && (
-            <div className="kstyle-sticker-controls">
-              <label>
-                size
-                <input
-                  type="range"
-                  min="0.5"
-                  max="2.5"
-                  step="0.1"
-                  value={selected.scale}
-                  onChange={(e) =>
-                    updateSelected({ scale: parseFloat(e.target.value) })
-                  }
-                />
-              </label>
-              <label>
-                rotate
-                <input
-                  type="range"
-                  min="-180"
-                  max="180"
-                  step="5"
-                  value={selected.rotation}
-                  onChange={(e) =>
-                    updateSelected({ rotation: parseInt(e.target.value) })
-                  }
-                />
-              </label>
-              <button
-                type="button"
-                className="kstyle-btn-danger"
-                onClick={deleteSelected}
-              >
-                delete
-              </button>
-            </div>
-          )}
         </div>
-
-        <DecoratePanel
-          stripColorId={stripColorId}
-          onStripColorChange={setStripColorId}
-          photoFilter={photoFilter}
-          onFilterChange={setPhotoFilter}
-          onAddSticker={addSticker}
-        />
       </div>
 
       <div className="kstyle-editor-footer">

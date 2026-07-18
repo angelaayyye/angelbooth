@@ -4,10 +4,9 @@ import type {
   CapturedPhoto,
   LayoutOption,
   SessionMode,
-  ThemeOption,
 } from './types';
 import { mergeAllDuoSlots, mergeDuoPhotos } from './utils/mergeDuoPhotos';
-import { LAYOUTS, THEMES, COUNTDOWN_SECONDS } from './constants';
+import { LAYOUTS, COUNTDOWN_SECONDS } from './constants';
 import { useRoom } from './hooks/useRoom';
 import { WelcomeScreen } from './components/WelcomeScreen';
 import { SetupScreen } from './components/SetupScreen';
@@ -18,7 +17,6 @@ import { StripEditor } from './components/StripEditor';
 function App() {
   const [step, setStep] = useState<AppStep>('welcome');
   const [layout, setLayout] = useState<LayoutOption>(LAYOUTS[0]);
-  const [theme, setTheme] = useState<ThemeOption>(THEMES[0]);
   const [sessionMode, setSessionMode] = useState<SessionMode | null>(null);
   const [photos, setPhotos] = useState<(CapturedPhoto | undefined)[]>([]);
 
@@ -31,20 +29,16 @@ function App() {
 
   useEffect(() => {
     if (sessionMode === 'remote' && roomApi.isHost && roomApi.room) {
-      roomApi.updateSettings(layout.id, theme.id, layout.photoCount);
+      roomApi.updateSettings(layout.id, 'classic', layout.photoCount);
     }
-  }, [layout, theme, sessionMode, roomApi.isHost, roomApi.room?.id]);
+  }, [layout, sessionMode, roomApi.isHost, roomApi.room?.id]);
 
   useEffect(() => {
     if (roomApi.room?.layoutId) {
       const remoteLayout = LAYOUTS.find((l) => l.id === roomApi.room?.layoutId);
       if (remoteLayout && !roomApi.isHost) setLayout(remoteLayout);
     }
-    if (roomApi.room?.themeId) {
-      const remoteTheme = THEMES.find((t) => t.id === roomApi.room?.themeId);
-      if (remoteTheme && !roomApi.isHost) setTheme(remoteTheme);
-    }
-  }, [roomApi.room?.layoutId, roomApi.room?.themeId, roomApi.isHost]);
+  }, [roomApi.room?.layoutId, roomApi.isHost]);
 
   useEffect(() => {
     if (roomApi.room?.phase === 'capture' && step === 'lobby') {
@@ -144,10 +138,8 @@ function App() {
         {step === 'setup' && (
           <SetupScreen
             selectedLayout={layout}
-            selectedTheme={theme}
             sessionMode={sessionMode}
             onLayoutSelect={setLayout}
-            onThemeSelect={setTheme}
             onSessionModeChange={setSessionMode}
             onEnter={handleSetupContinue}
             onBack={() => setStep('welcome')}
@@ -207,7 +199,6 @@ function App() {
               { length: layout.photoCount },
               (_, i) => photos[i],
             ).filter((p): p is CapturedPhoto => !!p)}
-            theme={theme}
             onBack={() => {
               setPhotos([]);
               roomApi.resetCapture();

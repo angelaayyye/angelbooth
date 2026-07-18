@@ -1,14 +1,12 @@
-import type { LayoutId, LayoutOption, SessionMode, ThemeOption } from '../types';
-import { LAYOUTS, THEMES } from '../constants';
+import type { LayoutId, LayoutOption, SessionMode } from '../types';
+import { LAYOUTS } from '../constants';
 import '../kstyle.css';
 import { KstyleNav } from './KstyleNav';
 
 interface SetupScreenProps {
   selectedLayout: LayoutOption;
-  selectedTheme: ThemeOption;
   sessionMode: SessionMode | null;
   onLayoutSelect: (layout: LayoutOption) => void;
-  onThemeSelect: (theme: ThemeOption) => void;
   onSessionModeChange: (mode: SessionMode) => void;
   onEnter: () => void;
   onBack: () => void;
@@ -32,10 +30,8 @@ function FramePreview({ layoutId, count }: { layoutId: LayoutId; count: number }
 
 export function SetupScreen({
   selectedLayout,
-  selectedTheme,
   sessionMode,
   onLayoutSelect,
-  onThemeSelect,
   onSessionModeChange,
   onEnter,
   onBack,
@@ -48,7 +44,7 @@ export function SetupScreen({
           pick your vibe
         </h1>
         <p style={{ color: '#666', marginBottom: '2rem', fontSize: '0.95rem' }}>
-          choose a frame, theme, and how you want to shoot
+          choose a frame and how you want to shoot — colours &amp; filters come after
         </p>
 
         <div className="kstyle-setup-grid">
@@ -91,25 +87,6 @@ export function SetupScreen({
               </div>
             </section>
 
-            <section>
-              <p className="kstyle-section-label">theme</p>
-              <div className="kstyle-theme-row">
-                {THEMES.map((theme) => (
-                  <button
-                    key={theme.id}
-                    type="button"
-                    className={`kstyle-theme-swatch ${selectedTheme.id === theme.id ? 'selected' : ''}`}
-                    style={{
-                      background: theme.bg,
-                      borderColor: selectedTheme.id === theme.id ? '#1a1a1a' : theme.border,
-                    }}
-                    onClick={() => onThemeSelect(theme)}
-                    title={theme.name}
-                  />
-                ))}
-              </div>
-            </section>
-
             <button
               type="button"
               className="kstyle-btn-primary"
@@ -121,12 +98,30 @@ export function SetupScreen({
             </button>
           </div>
 
-          <aside className="kstyle-card kstyle-strip-mock hidden md:flex" style={{ background: selectedTheme.bg, borderColor: selectedTheme.border, borderWidth: 3, borderStyle: 'solid' }}>
-            <p className="kstyle-section-label" style={{ color: selectedTheme.text, opacity: 0.6 }}>preview</p>
+          <aside
+            className="kstyle-card kstyle-strip-mock hidden md:flex"
+            style={{
+              background: '#ffffff',
+              borderColor: '#1a1a1a',
+              borderWidth: 3,
+              borderStyle: 'solid',
+            }}
+          >
+            <p className="kstyle-section-label" style={{ color: '#111', opacity: 0.45 }}>
+              preview
+            </p>
             {Array.from({ length: selectedLayout.photoCount }).map((_, i) => (
-              <div key={i} className="kstyle-strip-slot" style={{ borderColor: selectedTheme.border }} />
+              <div key={i} className="kstyle-strip-slot" style={{ borderColor: '#ddd' }} />
             ))}
-            <p style={{ fontSize: '0.65rem', textAlign: 'center', marginTop: 'auto', color: selectedTheme.text, opacity: 0.5 }}>
+            <p
+              style={{
+                fontSize: '0.65rem',
+                textAlign: 'center',
+                marginTop: 'auto',
+                color: '#111',
+                opacity: 0.45,
+              }}
+            >
               {selectedLayout.name}
             </p>
           </aside>

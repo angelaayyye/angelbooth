@@ -7,7 +7,7 @@ import {
 } from '../constants';
 import { PHOTO_FILTERS } from '../utils/photoFilters';
 
-type DecorateTab = 'colours' | 'stickers' | 'filters';
+type DecorateTab = 'colours' | 'filters' | 'stickers';
 
 interface DecoratePanelProps {
   stripColorId: string;
@@ -19,8 +19,8 @@ interface DecoratePanelProps {
 
 const TABS: { id: DecorateTab; label: string }[] = [
   { id: 'colours', label: 'colours' },
-  { id: 'stickers', label: 'stickers' },
   { id: 'filters', label: 'filters' },
+  { id: 'stickers', label: 'stickers' },
 ];
 
 export function DecoratePanel({
@@ -67,6 +67,27 @@ export function DecoratePanel({
           </div>
         )}
 
+        {tab === 'filters' && (
+          <div className="kstyle-filter-grid">
+            {PHOTO_FILTERS.map((filter) => (
+              <button
+                key={filter.id}
+                type="button"
+                className={photoFilter === filter.id ? 'active' : ''}
+                onClick={() => onFilterChange(filter.id)}
+                title={filter.name}
+              >
+                <span
+                  className="kstyle-filter-swatch"
+                  style={{ filter: filter.css }}
+                  aria-hidden
+                />
+                <span className="kstyle-filter-name">{filter.name}</span>
+              </button>
+            ))}
+          </div>
+        )}
+
         {tab === 'stickers' && (
           <>
             <div className="kstyle-pack-picker">
@@ -96,27 +117,6 @@ export function DecoratePanel({
             </div>
             <p className="kstyle-sticker-hint">tap to add, drag to move</p>
           </>
-        )}
-
-        {tab === 'filters' && (
-          <div className="kstyle-filter-grid">
-            {PHOTO_FILTERS.map((filter) => (
-              <button
-                key={filter.id}
-                type="button"
-                className={photoFilter === filter.id ? 'active' : ''}
-                onClick={() => onFilterChange(filter.id)}
-                title={filter.name}
-              >
-                <span
-                  className="kstyle-filter-swatch"
-                  style={{ filter: filter.css }}
-                  aria-hidden
-                />
-                <span className="kstyle-filter-name">{filter.name}</span>
-              </button>
-            ))}
-          </div>
         )}
       </div>
     </div>

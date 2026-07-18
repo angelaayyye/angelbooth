@@ -228,11 +228,6 @@ export function getStripColor(id: string): StripColorOption {
   return STRIP_COLORS.find((c) => c.id === id) ?? STRIP_COLORS[0];
 }
 
-export function getInitialStripColorId(theme: ThemeOption): string {
-  const match = STRIP_COLORS.find((c) => c.bg === theme.bg);
-  return match?.id ?? 'white';
-}
-
 export function stripColorToStyle(color: StripColorOption) {
   return {
     bg: color.bg,
